@@ -1,7 +1,7 @@
 # Ignorenet
 
 ### Project Description
-Integrating biological knowledge with experimental data is vital for understanding the mechanisms underlying complex diseases and clinical phenotypes. Unfortunately, most genes differentially expressed in association with disease have no currently described disease-associated function in the literature (aka the ignorome) [1-2]. The current project aims to integrate existing linked open biomedical resources and software/tools with publicly availible high-throughput data repositories to identify and annotate the function of uncharacterized disease-associated genes for a specific disease. This repository documents our efforts to reveal and annotate disease-specific ignoromes.
+Integrating biological knowledge with experimental data is vital for understanding the mechanisms underlying complex diseases and clinical phenotypes. Unfortunately, most genes differentially expressed in association with disease have no currently described disease-associated function in the literature (aka the ignorome) [1-2]. The current project aims to integrate existing linked open biomedical resources and software/tools with publicly available high-throughput data repositories to identify and annotate the function of uncharacterized disease-associated genes for a specific disease. This repository documents our efforts to reveal and annotate disease-specific ignoromes.
 <br>
 ### Approach
 The general approach we plan to use (using diabetes as an example). Please note that this work flow is subject to change and currently under development.

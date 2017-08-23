@@ -32,5 +32,6 @@
 .DS_Store?
 ._*
 *.idea/
-.Rproj.user
-.RData
+*.Rproj.user
+*.RData
+*.Rhistory

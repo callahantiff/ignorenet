@@ -1,0 +1,166 @@
+---
+title: "BioHackathon 2017"
+output: html_notebook
+---
+
+# Introduction
+This script is meant to be used for reading in and processing data stored on [GEO](https://www.ncbi.nlm.nih.gov/geo/). The current script was created by modifying code from [GEO2R](https://www.ncbi.nlm.nih.gov/geo/geo2r/). In addition, the GEO database has been downloaded in order to access dataset metadata.
+
+## Metadata Retrieval
+```{r}
+# load needed libraries
+library(Biobase)
+library(GEOquery)
+library(limma)
+library(RColorBrewer)
+```
+
+### GEO Metadata Database
+The Metadata Database is 
+```{r}
+## Connect to database
+con <- dbConnect(SQLite(),'GEO_Database/GEOmetadb.sqlite')
+
+# view tables
+geo_tables <- dbListTables(con)
+
+# view fields associated with each table
+dbListFields(con,'gse')
+
+# get table schema
+dbGetQuery(con,'PRAGMA TABLE_INFO(gse)')
+
+# query a table
+rs <- dbGetQuery(con,'SELECT * from gse
+                      WHERE gse = "GSE14722"')
+
+# close db connection
+dbDisconnect(con)
+```
+
+```{r, cache=T, echo=T, vmessage=F, warning=F, results='markup', eval=T}
+# get GEO accession id
+id = "GSE14722"
+
+# Use the getGEO() function to download the GEO data for the id stored in x
+GSEDATA <- getGEO(c(id), GSEMatrix=TRUE, AnnotGPL=FALSE)
+
+# get the expression set object
+eset <- GSEDATA[[1]]
+
+# Save the objects generated for future use in the current working directory
+save(GSEDATA, eset, file=paste("GEO_Data/", id, ".RData", sep=""))
+
+# get the annotation GPL id and save it
+gpl <- getGEO(eset@annotation, destdir=paste("GEO_Data/.", sep=""))
+Meta(gpl)$title
+
+
+# get metadata
+metadata = eset@phenoData@data
+
+# Store the dataset ids in a vector GEO_DATASETS
+GEO_DATASETS <- c(id)
+
+# Use the function we created to return the eset object - assumes you always want the first result
+exp_set <- getGEOdataObjects(GEO_DATASETS[1])
+exp_set 
+
+# get the annotation GPL id
+gpl <- getGEO(eset@annotation, destdir=paste("GEO_Data/",id, sep=""))
+Meta(gpl)$title
+ 
+# Inspect the table of the gpl annotation object
+colnames(Table(gpl))
+ 
+# Get the gene symbol and entrez ids to be used for annotations
+Table(gpl)[1:10, c("ID", "ENTREZ_GENE_ID", "Gene Symbol")]
+dim(Table(gpl))
+ 
+# Get the gene expression data for all the probes with a gene symbol
+geneProbes <- which(!is.na(Table(gpl)$"Gene Symbol"))
+probeids <- as.character(Table(gpl)$ID[geneProbes])
+ 
+probes <- intersect(probeids, rownames(exprs(eset)))
+length(probes)
+
+# create a gene matrix
+geneMatrix <- exprs(eset)[probes, ]
+inds <- which(Table(gpl)$ID %in% probes)
+
+# Check you get the same probes
+head(probes)
+head(as.character(Table(gpl)$ID[inds]))
+ 
+# Create the expression matrix with gene ids
+geneMatTable <- cbind(geneMatrix, Table(gpl)[inds, c(1, 6, 9, 12)])
+head(geneMatTable)
+ 
+# Save a copy of the expression matrix as a csv file
+write.csv(geneMatTable, paste(GEO_DATASETS[1], "_DataMatrix.csv", sep=""), row.names=T)
+```
+
+## Differential Expression Analysis
+
+```{r expDesign, cache=T, echo=T,vmessage=F, warning=F, results='markup', eval=T}
+################################################################
+#   Differential expression analysis with limma
+# load series and platform data from GEO
+gset <- getGEO("GSE14722", GSEMatrix =TRUE, AnnotGPL=TRUE)
+if (length(gset) > 1) idx <- grep("GPL96", attr(gset, "names")) else idx <- 1
+gset <- gset[[idx]]
+
+# make proper column names to match toptable 
+fvarLabels(gset) <- make.names(fvarLabels(gset))
+
+# group names for all samples
+gsms <- "00000000000111111111111"
+sml <- c()
+for (i in 1:nchar(gsms)) { sml[i] <- substr(gsms,i,i) }
+
+# log2 transform
+ex <- exprs(gset)
+qx <- as.numeric(quantile(ex, c(0., 0.25, 0.5, 0.75, 0.99, 1.0), na.rm=T))
+LogC <- (qx[5] > 100) ||
+          (qx[6]-qx[1] > 50 && qx[2] > 0) ||
+          (qx[2] > 0 && qx[2] < 1 && qx[4] > 1 && qx[4] < 2)
+if (LogC) { ex[which(ex <= 0)] <- NaN
+  exprs(gset) <- log2(ex) }
+
+# verify data is normalized - distributions should appear similar to each other
+boxplot(ex, col = brewer.pal(9, "Set1"), 
+        cex.axis = 0.75, cex.lab = 0.5, las=2,
+        main = "Distribution of Intensity Values")
+
+## Differential Expression Analysis
+# set group names
+sml <- paste("G", sml, sep="")
+fl <- as.factor(sml)
+gset$description <- fl
+
+# set model design
+design <- model.matrix(~ description + 0, gset)
+colnames(design) <- levels(fl)
+
+# fit model
+fit <- lmFit(gset, design)
+cont.matrix <- makeContrasts(G1-G0, levels=design)
+fit2 <- contrasts.fit(fit, cont.matrix)
+fit2 <- eBayes(fit2)
+
+# view results
+tT <- topTable(fit2, adjust="fdr", sort.by="B", number=250)
+tT <- subset(tT, select=c("Gene.symbol","adj.P.Val","P.Value","t","B","logFC"))
+
+# add important metadata to output
+
+
+# write results
+write.table(tT, file=stdout(), row.names=F, sep="\t")
+
+```
+
+
+
+
+

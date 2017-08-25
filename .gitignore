@@ -7,11 +7,14 @@
 ########################
 **/R/GEO_Database/
 **/R/GEO_Data/
+**/R/Biohackathon_GEO_cache
+**/R/Biohackathon_GEO_files
 
 # Scripts #
 ###########
 *Biohackathon_GEO.nb.html
 *GEO_Processing.ipynb
+*GEO_database.R
 
 # Packages #
 ############
@@ -35,3 +38,4 @@
 *.Rproj.user
 *.RData
 *.Rhistory
+.Rproj.user

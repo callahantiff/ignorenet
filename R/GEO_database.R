@@ -1,6 +1,6 @@
 ## Load needed libraries
 # source("https://bioconductor.org/biocLite.R")
-# biocLite("DESeq2")
+# biocLite("GEOmetadb")
 library(GEOmetadb)
 
 ## Download and unzip database

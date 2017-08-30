@@ -1,12 +1,12 @@
-# Ignorenet
+# ignorenet
 
 ### Project Description
 Integrating biological knowledge with experimental data is vital for understanding the mechanisms underlying complex diseases and clinical phenotypes. Unfortunately, most genes differentially expressed in association with disease have no currently described disease-associated function in the literature (aka the ignorome) [1-2]. The current project aims to integrate existing linked open biomedical resources and software/tools with publicly available high-throughput data repositories to identify and annotate the function of uncharacterized disease-associated genes for a specific disease. This repository documents our efforts to reveal and annotate disease-specific ignoromes.
 <br>
 ### Approach
-The general approach we plan to use (using diabetes as an example). Please note that this work flow is subject to change and currently under development.
+The general approach we plan to use (described using diabetes as an example). Please note that this workflow is subject to change and currently under development.
 
-#### Build an inital network representing our current knowledge of diabetes 
+#### Build an initial network representing our current knowledge of diabetes 
 Steps to build the network include:
    - Identifying DOID and HPO concepts annotated to diabetes
    - Identify genes associated with diabetes (Orphanet, OMIM, GAD, and UMLS)
@@ -19,15 +19,15 @@ PubAnnotation concept annotations will be mapped to concepts in the network
   - *Additional measures are under development*
 
 #### Identify the ignorome
-We will use publicly availible gene expression data to identify the ignorome (procedure similar to Riba et al. [2])
+We will use publicly available gene expression data to identify the ignorome (procedure similar to Riba et al. [2])
   - Identify, merge, and analyze relevant GEO datasets
   - Produce a list of genes that are differentially expressed (DEGs) in diabetes
   - Map differentially expressed genes to the genes in the diabetes knowledge network created
   - The genes that we are not able to be mapped are diabetes-specific ignorome candidates
-  - Inital validaiton of gene list using genes identified in Riba et al. [2]
+  - Initial validation of gene list using genes identified in Riba et al. [2]
 
 #### Annotate the ignorome gene candidates
-Annotate the genes using the same resources used when building the inital diabetes knowledge network
+Annotate the genes using the same resources used when building the initial diabetes knowledge network
   - Determine if any of the ignorome concept annotations can be used to connect the ignorome genes to the diabetes knowledge network
 
 #### Details regarding network inference under development
@@ -47,7 +47,7 @@ Annotate the genes using the same resources used when building the inital diabet
   * [PubCases](https://pubcases.dbcls.jp/)
 
 #### Public Data and Repositories
-  * NCBI Gene Expression Omnibus
+  * [NCBI Gene Expression Omnibus](https://www.ncbi.nlm.nih.gov/geo/)
 
 #### Dependencies
   * SPARQL Endpoint APIs
@@ -55,8 +55,9 @@ Annotate the genes using the same resources used when building the inital diabet
       - Python
   * Network Generation, Inference, and Visualization
       - Python - Networkx
+      - Matlab
       - Cytoscape
-  * Bioinformatics Analyses
+  * Bioinformatic Analyses
       - R + Bioconductor
 
 <br><br>

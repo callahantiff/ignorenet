@@ -12,7 +12,7 @@ output:
 * [Introduction](#introduction)
 * [Microarray Data Workflow](#data1)
 * [RNA-Seq Data Workflow](#data2)
-* [Retrieving Metdata](#metadata)
+* [Retrieving Metadata](#metadata)
 * [Workflow Reproduciblity](#repo)
 
 
@@ -491,18 +491,25 @@ The GEO Metadata Database is used to retrieve important metadata about GEO data 
 con <- DBI::dbConnect(SQLite(),'GEO_Database/GEOmetadb.sqlite')
 
 # query a table
-metadata <- DBI::dbGetQuery(con,'SELECT gse, pubmed_id, title, submission_date, type, overall_design
+metadata <- DBI::dbGetQuery(con,'SELECT gse, pubmed_id, title, summary, submission_date, type, overall_design
                       FROM gse
                       WHERE gse IN ("GSE14722", "GSE63310")')
 
 # print results
 knitr::kable(metadata)
 
+# replace tabs with pipes
+metadata$title = gsub("\t", " | ", metadata$title)
+metadata$summary = gsub("\t", " | ", metadata$summary)
+metadata$type = gsub("\t", " | ", metadata$type)
+metadata$overall_design = gsub("\t", " | ", metadata$overall_design)
+
 # write metadata to csv
-write.csv(metadata, 
-            'GEO_Data/GES_Metadata.csv', 
+write.table(metadata, 
+            'GEO_Data/GES_Metadata.txt', 
             row.names = FALSE, 
-            quote = FALSE)
+            quote = FALSE,
+            sep = '\t')
 
 # close db connection
 DBI::dbDisconnect(con)

@@ -1,2 +1,0 @@
-gse	type	pubmed_id	submission_date
-GSE14722	Expression profiling by array	18818296	2009-02-05

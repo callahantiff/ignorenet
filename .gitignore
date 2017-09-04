@@ -12,11 +12,13 @@
 
 # Scripts #
 ###########
-*Biohackathon_GEO.nb.html
-*GEO_Processing.ipynb
-*GEO_database.R
-*Biohackathon_GEO_Microarray_RNASeq.nb.html
-*Biohackathon_GEO_Microarray_RNASeq.Rmd
+*R/Biohackathon_GEO.nb.html
+*R/GEO_Processing.ipynb
+*R/GEO_database.R
+*R/Biohackathon_GEO_Microarray_RNASeq.nb.html
+*R/Biohackathon_GEO_Microarray_RNASeq.Rmd
+*R/Biohackathon_GEO_Microarray.nb.html
+*R/Biohackathon_GEO_Microarray.Rmd
 
 # Packages #
 ############

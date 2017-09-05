@@ -1,0 +1,8 @@
+SlideNumber	FileNameCyc3	FileNameCyc5	Species	Cyc3	Cy5
+1	GSM1074810_P1_532.pair	GSM1074803_C1_532.pair	Homo sapiens (human)	PE	control
+2	GSM1074811_P2_532.pair	GSM1074804_C2_532.pair	Homo sapiens (human)	PE	control
+3	GSM1074812_P3_532.pair	GSM1074805_C3_532.pair	Homo sapiens (human)	PE	control
+4	GSM1074813_P4_532.pair	GSM1074806_C4_532.pair	Homo sapiens (human)	PE	control
+5	GSM1074814_P6_532.pair	GSM1074807_C5_532.pair	Homo sapiens (human)	PE	control
+6		GSM1074808_C6_532.pair	Homo sapiens (human)	PE	control
+7		GSM1074809_C7_532.pair	Homo sapiens (human)	PE	control

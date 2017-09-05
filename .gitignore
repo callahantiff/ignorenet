@@ -20,6 +20,7 @@
 *R/Biohackathon_GEO_Microarray_RNASeq.Rmd
 *R/Biohackathon_GEO_Microarray.nb.html
 *R/Biohackathon_GEO_Microarray.Rmd
+*R/Biohackathon_GEO.Rmd
 
 # Packages #
 ############
@@ -41,5 +42,5 @@
 ._*
 *.idea/
 .Rproj.user
-.RData
-.Rhistory
+R/.RData
+R/.Rhistory

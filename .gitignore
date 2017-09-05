@@ -6,9 +6,10 @@
 # Directories #
 ########################
 **/R/GEO_Database/
-**/R/GEO_Data/
 **/R/Biohackathon_GEO_cache
 **/R/Biohackathon_GEO_files
+**R/Raw_Geo_Data
+**R/GEO_Data
 
 # Scripts #
 ###########
@@ -39,7 +40,6 @@
 .DS_Store?
 ._*
 *.idea/
-*.Rproj.user
-*.RData
-*.Rhistory
 .Rproj.user
+.RData
+.Rhistory

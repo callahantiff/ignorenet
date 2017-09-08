@@ -599,7 +599,10 @@ genes = merge(entrez, symbol, by = 'ProbeID', all = TRUE)[-1,]
 ```
 
 
+<a name="abarray"/> 
 
+### Process Applied Biosystems Genome Survey Data
+Downloaded raw text files for each study utilizing Applied Biosystems Genome Survey microarrays are stored in folders and named after the study GSE Accession identifier. IThis workflow is still underconstruction. The general workflow for processing BeadArray data described in the [ABarray User Guide](https://bioconductor.riken.jp/packages/3.0/bioc/vignettes/ABarray/inst/doc/ABarray.pdf).
 ```{r cache=FALSE, echo=TRUE, vmessage=FALSE, warning=FALSE, eval=TRUE}
 # load libraries
 library(ABarray)

@@ -51,7 +51,7 @@ library(R.utils)
 <a name="data1"/>   
 
 ## Accessing GEO Data: No Raw Data Availible
-When there is no raw data available on GEO, the GEO Data set SOFT files are downloaded and processed.
+When there is no raw data available on GEO, the GEO Data Set (GDS) SOFT files are downloaded and processed. If the GSE Accession identifier does not have a corresponding GSD the GSE matrix can be downloaded and the expression data and annotation file it contains can be re-analyzed. In these scenarios, the data are analyzed with caution and all pre-processing steps described by the authors are verified in an attempt to make the analysis pipeline across platforms as consistent as possible.
 ```{r warning=FALSE, message=FALSE, eval=FALSE, cache=FALSE}
 ## Download Data
 id <- 'GDS2080'
@@ -77,10 +77,10 @@ gds <- GEOquery::getGEO(filename=paste('Raw_GEO_Data/', id, '/', id, '.soft.gz',
 
 ## GSE Data
 # Use the getGEO() function to download the GEO data for the id
-id = 'GSE43942'
+id = 'GSE10588'
 assign(paste(id, '_gse_data', sep = ''), 
        GEOquery::getGEO(id, GSEMatrix=TRUE, AnnotGPL=FALSE))
-gse_data <- GSE43942_gse_data
+gse_data <- GSE10588_gse_data
 
 # create gene expression set. If multiple data sets, take the first one and retrieve platform-specific annotation information
 if (length(gse_data) > 1) idx <- grep(gse_data[[1]]@annotation, attr(gse_data, 'names')) else idx <- 1
@@ -89,7 +89,7 @@ if (length(gse_data) > 1) idx <- grep(gse_data[[1]]@annotation, attr(gse_data, '
 <a name="eset1"/> 
 
 ### Create Expression Set
-Create an expression set from the extracted data. Additionally, this step also investigates whether the data has been log2-transformed and pulls gene annotation information as well as sample group assignments.
+Create an expression set from the extracted data extracted from GEO. Additionally, this step also  accesses sample group assignment information from the downloaded GSE matrix.
 ```{r warning=FALSE, message=FALSE, eval=FALSE, cache=FALSE}
 ## GDS
 # print column names
@@ -125,9 +125,6 @@ names(GSE_genes) = c('probe', 'Genes.ENTREZID', 'Genes.SYMBOL')
 samples = colnames(exprs_data)
 
 # set group membership for all samples
-# GSE10588
-groups = as.character(lapply(as.character(gse_exp_set@phenoData@data$title), function(x) ifelse(length(grep('preeclampsia', x)) == 1, 'SPE', 'control')))
-
 # GSE43942
 groups = as.character(lapply(as.character(gse_exp_set@phenoData@data$source_name_ch1), function(x) ifelse(length(grep('norm', x)) == 1, 'control', 'PE')))
 
@@ -238,7 +235,7 @@ base::file.remove(paste('Raw_GEO_Data/', id, '_RAW.tar', sep=''))
 ```
 
 ### Get Target Information  
-As most of the studies on GEO do not contain files containing target information this information must be extracted from each study's Geo Study Matrix. The code below is designed to specifically extract sample label information that can be used to create the groupings for differential expression analysis.
+As most of the studies on GEO do not contain files containing target information, this information must be extracted from each study's Geo Study Matrix. The code below is designed to specifically extract sample label information that can be used to create the groupings for differential expression analysis.
 ```{r warning=FALSE, message=FALSE, eval=FALSE, cache=FALSE}
 # download GSE study data
 gse_data <- GEOquery::getGEO(id, GSEMatrix=TRUE, AnnotGPL=FALSE)
@@ -278,6 +275,9 @@ groups = base::rep(c('control', 'PE'), 5)
 
 #GSE74341
 groups = c('control', 'EOPE', 'control', 'EOPE', 'control', 'EOPE', 'control', 'EOPE', 'control', 'EOPE', 'control', 'EOPE', 'control', 'EOPE', 'control', 'LOPE', 'control', 'LOPE', 'control', 'LOPE', 'control', 'LOPE', 'control', 'LOPE', 'control', 'LOPE', 'control', 'LOPE', 'control', 'LOPE', 'control', 'term', 'control', 'term', 'control', 'term', 'control', 'term', 'control', 'term', 'control', 'preterm', 'control', 'preterm', 'control', 'preterm', 'control', 'preterm', 'control', 'preterm')
+
+# GSE10588
+groups = as.character(lapply(as.character(gse_exp_set@phenoData@data$title), function(x) ifelse(length(grep('preeclampsia', x)) == 1, 'SPE', 'control')))
 
 # print groups
 table(groups)
@@ -596,6 +596,77 @@ symbol = aggregate(GeneSymbol ~ ProbeID,
 
 # merge lists together
 genes = merge(entrez, symbol, by = 'ProbeID', all = TRUE)[-1,]
+```
+
+
+
+```{r cache=FALSE, echo=TRUE, vmessage=FALSE, warning=FALSE, eval=TRUE}
+# load libraries
+library(ABarray)
+
+## create data file
+# list files in a directory
+file_list <- base::list.files(path = paste('Raw_GEO_Data/', id, '/raw_data', sep=''), full.names=TRUE)
+
+# merge all files in the directory into a single data frame
+for (file in file_list){
+
+  # if the merged dataset doesn't exist, create it
+  if (!base::exists("combined_ABI_data")){
+    combined_ABI_data <- utils::read.table(file, header=TRUE, sep="\t")
+    combined_ABI_data$file <- rep(file, nrow(combined_ABI_data))
+  }
+   
+  # if the merged dataset does exist, append to it
+  if (base::exists("combined_ABI_data")){
+    temp_dataset <- utils::read.table(file, header=TRUE, sep="\t")
+    temp_dataset$file <- rep(file, nrow(temp_dataset))
+    combined_ABI_data <- base::rbind(combined_ABI_data, temp_dataset)
+    base::rm(temp_dataset)
+  }
+}
+
+# update dataframe to only include certain columns in a specific order
+vars <- names(combined_ABI_data) %in% c("Gene_ID", "Probe_ID", "Signal", "Flags", "S_N")
+
+# subset folder
+up_combo_data <- combined_ABI_data[vars]
+
+# rename folder columns
+base::names(up_combo_data) <- c("geneID", "probeID", "Signal", "Flags", "S/N")
+
+# write file to directory
+utils::write.table(up_combo_data,
+            paste('Raw_GEO_Data/', id, '/merged_datafile.txt', sep=''),
+            row.names = FALSE, 
+            quote = FALSE,
+            sep = '\t')
+
+## create the experimental design file
+# subset data to only include unqiue file and assay names
+exp_info <- unique(combined_ABI_data[c("file", "Assay_Name")])
+
+# remove spaces from strings
+exp_info$Assay_Name <- unique(gsub(" ", "_", exp_info$Assay_Name))
+
+# add grouping information (only hard-coded bc working on the airplane)
+tissue <- c(rep('control', 11), rep('PE', 1), rep('control', 15), rep('PE', 16))
+
+# combine exp info into dataframe
+exp_info_grp <- cbind(exp_info, tissue)
+names(exp_info_grp) <- c("sampleName", "assayName", "group")
+
+# write file to directory
+utils::write.table(exp_info_grp,
+            paste('Raw_GEO_Data/', id, '/merged_exp_info.txt', sep=''),
+            row.names = FALSE, 
+            quote = FALSE,
+            sep = '\t')
+
+## Analyze data
+eset = ABarray(paste('Raw_GEO_Data/', id, '/merged_datafile.txt', sep=''), 
+               paste('Raw_GEO_Data/', id, '/merged_exp_info.txt', sep=''), "group")
+
 ```
 
 <a name="dea"/>  

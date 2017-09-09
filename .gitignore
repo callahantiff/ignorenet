@@ -10,6 +10,7 @@
 **/R/Biohackathon_GEO_files
 **R/Raw_Geo_Data
 **R/GEO_Data
+*!R/GEO_Data/Metadata.txt
 
 # Scripts #
 ###########

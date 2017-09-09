@@ -752,20 +752,32 @@ con <- DBI::dbConnect(SQLite(),'GEO_Database/GEOmetadb.sqlite')
 metadata <- DBI::dbGetQuery(con,'SELECT gse, pubmed_id, title, summary, submission_date, type, overall_design
 FROM gse
 WHERE gse IN (
-"GSE4707", 
-"GSE4707")')
+"GSE4707",
+"GSE6573",
+"GSE10588",
+"GSE25906",
+"GSE14722",
+"GSE24129",
+"GSE30186",
+"GSE43942",
+"GSE47187",
+"GSE74341",
+"GSE35574",
+"GSE44711",
+"GSE60438",
+"GSE73374")')
 
 # print results
 knitr::kable(metadata)
 
 # replace tabs in strings with pipes
-metadata$title = gsub("\t", " | ", metadata$title)
-metadata$summary = gsub("\t", " | ", metadata$summary)
-metadata$type = gsub("\t", " | ", metadata$type)
-metadata$overall_design = gsub("\t", " | ", metadata$overall_design)
+metadata$title = base::gsub("\t", " | ", metadata$title)
+metadata$summary = base::gsub("\t", " | ", metadata$summary)
+metadata$type = base::gsub("\t", " | ", metadata$type)
+metadata$overall_design = base::gsub("\t", " | ", metadata$overall_design)
 
 # write metadata to csv
-write.table(metadata, 
+utils::write.table(metadata, 
             'GEO_Data/GES_Metadata.txt', 
             row.names = FALSE, 
             quote = FALSE,

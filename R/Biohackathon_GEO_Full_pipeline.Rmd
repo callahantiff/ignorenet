@@ -16,6 +16,7 @@ output:
     * [Affymetrix](#affy)
     * [Illumina](#illum)
     * [Agilent](#agil)
+    * [Applied Biosystems](#abarray)
 * [Differential Expression Analysis](#dea)
 * [Retrieving Metadata](#metadata)
 * [Workflow Reproduciblity](#repo)
@@ -27,7 +28,7 @@ output:
 <a name="introduction"/> 
 
 ## Introduction
-This script is designed to download and process data from [GEO](https://www.ncbi.nlm.nih.gov/geo/). For each downloaded data set, the data is processed and converted into an expression matrix (rows are genes and columns are samples). Additionally, using the [GEO Metadata Database](https://www.ncbi.nlm.nih.gov/geo/info/geo_paccess.html) specific features for each data set are collected and kept for downstream processing. Prior to running differential expression analysis, the expression data is verified to ensure both normalization and log transformation had been performed. The RNA-seq data is put through additional verification to ensure that it has been run through [voom](http://web.mit.edu/~r/current/arch/i386_linux26/lib/R/library/limma/html/voom.html). This additional step permits the same limma pipeline to be used for both processed microarray and RNA-seq data ([Law et al., 2014](https://www.ncbi.nlm.nih.gov/pubmed/24485249), [limma user guide](http://bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf)).
+This script is designed to download and process data from [GEO](https://www.ncbi.nlm.nih.gov/geo/). For each downloaded dataset, the data is processed and converted into an expression matrix (rows are genes and columns are samples). Additionally, using the [GEO Metadata Database](https://www.ncbi.nlm.nih.gov/geo/info/geo_paccess.html) specific features for each dataset are collected and kept for downstream processing and analysis. Prior to running differential expression analysis, the expression data is verified to ensure both normalization and log transformation had been performed. Differential expression analysis is performed using limma and leverages code from existing workflows ([Law et al., 2014](https://www.ncbi.nlm.nih.gov/pubmed/24485249), [limma user guide](http://bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf)).
 
 
 ```{r message=FALSE, warning=FALSE}
@@ -51,12 +52,13 @@ library(R.utils)
 <a name="data1"/>   
 
 ## Accessing GEO Data: No Raw Data Availible
-When there is no raw data available on GEO, the GEO Data Set (GDS) SOFT files are downloaded and processed. If the GSE Accession identifier does not have a corresponding GSD the GSE matrix can be downloaded and the expression data and annotation file it contains can be re-analyzed. In these scenarios, the data are analyzed with caution and all pre-processing steps described by the authors are verified in an attempt to make the analysis pipeline across platforms as consistent as possible.
+When there is no raw data available on GEO, the GEO Data Set (GDS) SOFT files are downloaded and processed. If the GSE Accession identifier does not have a corresponding GSD identifier, the GSE matrix can be downloaded and the expression data and annotation file it contains can be re-analyzed. In these scenarios, the data are analyzed with caution and all pre-processing steps described by the authors are verified in an attempt to make the analysis pipeline across platforms as consistent as possible.
 ```{r warning=FALSE, message=FALSE, eval=FALSE, cache=FALSE}
-## Download Data
+## Download GDS
+# set GSE identifier
 id <- 'GDS2080'
 
-#Download GDS file, put it in the current directory, and load it:
+# download GDS file
 url <- paste('ftp://ftp.ncbi.nlm.nih.gov/geo/datasets/',
              stringr::str_sub(id, 1,4),
              'nnn/', 
@@ -75,10 +77,13 @@ utils::download.file(url, destfile=paste('Raw_GEO_Data/', id, '/', id, '.soft.gz
 # open GDS
 gds <- GEOquery::getGEO(filename=paste('Raw_GEO_Data/', id, '/', id, '.soft.gz', sep=''))
 
+
 ## GSE Data
-# Use the getGEO() function to download the GEO data for the id
+# set the GSE identifier
 id = 'GSE10588'
-assign(paste(id, '_gse_data', sep = ''), 
+
+# use the getGEO() function to download the GEO data for the id
+base::assign(paste(id, '_gse_data', sep = ''), 
        GEOquery::getGEO(id, GSEMatrix=TRUE, AnnotGPL=FALSE))
 gse_data <- GSE10588_gse_data
 
@@ -103,6 +108,7 @@ exprs <- Biobase::exprs(eset)
 fset <- Biobase::fData(eset)
 GSE_genes = fset[,c(1, 4, 3)]
 names(GSE_genes) = c('Genes.identifier', 'Genes.ENTREZID', 'Genes.SYMBOL')
+
 
 ## GSE
 # view dataset information
@@ -146,21 +152,21 @@ table(groups)
 <a name="preproc1"/>  
 
 ### Pre-Processing and Quality Control
-Prior to determining which genes are differentially expressed, the preprocessing performed by the submitter of the data is verified. Specifically, the data is checked to ensure normalization and log transformation. For example, if in the data have been pre-processed with RMAExpress then the data should have had convolution background correction, quantile normalization, and summarization using median polish. This also indicates that the expression values are on $log_{2}$ scale. Additional verification performed on the data includes checking for 'NA' values, removing duplicate genes, filtering out lowly expressed genes, and verifying sample clustering.
+Prior to determining which genes are differentially expressed, the preprocessing performed by the submitter of the data is verified. Specifically, the data is checked to ensure normalization and log transformation. Additional verification performed on the data includes checking for 'NA' values, removing duplicate genes, filtering out lowly expressed genes, and verifying sample clustering.
 ```{r cache=FALSE, echo=TRUE, vmessage=FALSE, warning=FALSE, eval=TRUE}
-## log-transformation
-# preview data - verify that the data has been log 2 transformed
+## log Transformation
+# preview data - verify that the data has been log2 transformed
 avg <- base::rowMeans(exprs)
 summary(avg)
 
-# if aglient, then data needs to be converted back to log 2 from log 10
+# if aglient, then data needs to be converted back to log2 from log10
 exprs_data <- base::log(10**exprs, 2)
 
-## check for NA values
+## Checking for NAs
 cat('There are', base::sum(!complete.cases(exprs_data)) , 'rows with NA values')
 exprs_data_cut = exprs_data[complete.cases(exprs_data), ]
 
-## data normalization
+## Normalization
 # create box plots to verify pre-processing
 boxplot(exprs_data_cut, col = brewer.pal(9, 'Set1'), 
         cex.axis = 0.5, cex.lab = 0.65, las=2,
@@ -171,7 +177,7 @@ cat('There are', dim(exprs_data_cut)[1], 'genes before removing duplicates')
 exprs_data_clean = exprs_data_cut[!duplicated(rownames(exprs_data_cut)),]
 cat('There are', dim(exprs_data_clean)[1], 'genes after removing', dim(exprs_data_cut)[1]-dim(exprs_data_clean)[1], 'duplicates')
 
-## filtering
+## Filtering
 # summarize average gene expression values
 avg <- rowMeans(exprs_data_clean)
 sum = summary(avg)
@@ -181,13 +187,12 @@ cutoff <- sum[2][[1]] # remove genes below first quantile
 exprs_data_clean = expFilter(exprs_data_clean, 
                      threshold = round(sum[2][[1]], 4))
 
-# remove genes below first quantile
+# remove genes with expression below first quantile
 cat('There are', dim(exprs_data_clean)[1], 'genes after removing', dim(affy.norm.exprs)[1]-dim(exprs_data_clean)[1], 'when filtering out genes with expresison values below the first quartile')
 ```
 
-If the expression data have been both normalized and log transformed the samples will have similar $log_{2}$ intensity distributions (first plot). If the data has been filtered the distribution should appear somewhat 'normal' (second plot).  
-
 ```{r cache=FALSE, echo=TRUE, vmessage=FALSE, warning=FALSE, eval=TRUE}
+## Clustering
 # cluster expression data by sample
 sample = EMA::clustering(data = exprs_data_clean, metric = 'pearson', method = 'average')
 EMA::clustering.plot(tree = sample, lab = groups, title = 'Filtered Data', scale='row', legend.pos = 'topleft')
@@ -214,13 +219,13 @@ write.table(exp, file = paste('GEO_Data/', id, '_clean_exp_data.txt', sep = ''),
             col.names = TRUE,
             quote = FALSE)
 ```
-Samples appear to cluster by their grouping providing evidence that the set of genes may be differentially expressed.  
+ 
 
 
 <a name="data2"/>   
 
 ## Accessing GEO Data: Raw Data Availible
-When there is raw data available on GEO, the supplementary data for each study are downloaded and processed. Raw data for each study are stored in a directory named after the study's GSE Accession identifier.
+When there is raw data available on GEO, the supplementary data for each study are downloaded and processed. Specifically, the non-normalized data is downloaded. Raw data for each study are stored in a directory named after the study's GSE Accession identifier.
 ```{r warning=FALSE, message=FALSE, eval=FALSE, cache=FALSE}
 ## Download Data
 id <- 'GSE74341'
@@ -287,9 +292,9 @@ table(groups)
 <a name="affy"/> 
 
 ### Process Affymetrix Data
-Downloaded CEL files for each study utilizing Affymetrix are stored in folders and named after the study GSE Accession identifier. The CEL files within each study-specific directory are converted to an AffyBatch object and normalized, background corrected, and $log_2$ transformed using Affy or Oligo RMA. Filtering was also performed and all genes with expression levels below the first quartile are removed. The general workflow for processing Affymetrix data described in the [limma User Guide](http://www.bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf) was used.
+Downloaded CEL files for each study utilizing Affymetrix are stored in folders and named after the study GSE Accession ID. The CEL files within each study-specific directory are converted to an AffyBatch object and normalized, background corrected, and $log_2$ transformed using Affy or Oligo RMA. Filtering was also performed and all genes with expression levels below the first quartile were removed. Probes are re-annotated using current annotation files from Bioconductor. The general workflow for processing Affymetrix data described in the [limma User Guide](http://www.bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf) was used.
 ```{r cache=FALSE, echo=TRUE, vmessage=FALSE, warning=FALSE, eval=TRUE}
-# load libraries
+## Load Libraries
 library(affy)
 library(affycoretools)
 library(oligo)
@@ -316,7 +321,7 @@ graphics::boxplot(affy.norm.exprs, col = brewer.pal(9, 'Set1'),
         cex.axis = 0.5, cex.lab = 0.65, las=2,
         ylab = TeX('$log_{2}$ Intensity'))
 
-## filtering
+## Filtering
 # summarize average gene expression values
 avg <- rowMeans(affy.norm.exprs)
 sum = summary(avg)
@@ -325,7 +330,7 @@ sum = summary(avg)
 cutoff <- sum[2][[1]] # remove genes below first quantile
 exp_filt = expFilter(affy.norm.exprs, threshold = round(sum[2][[1]], 4))
 
-# remove genes below first quantile
+# remove genes below first quartile
 cat('There are', dim(exp_filt)[1], 'genes after removing', dim(affy.norm.exprs)[1]-dim(exp_filt)[1], 'when filtering out genes with expresison values below the first quartile')
 
 # cluster expression data by sample
@@ -355,7 +360,7 @@ write.table(exp, file = paste('GEO_Data/', id, '_clean_exp_data.txt', sep = ''),
 # rename saved file
 exprs_data_clean = exp_filt
 
-## annotate probes
+## Annotate Probes
 # print columns
 columns(hugene20sttranscriptcluster.db)
 
@@ -372,7 +377,6 @@ genes_annot <- AnnotationDbi::select(hugene20sttranscriptcluster.db,
                             keys=as.character(genes_a@featureData@data$PROBEID),
                                columns=c('SYMBOL', 'ENTREZID'), 
                                keytype='PROBEID')
-
 
 # aggregate 1:many mappings into single list
 entrez = aggregate(ENTREZID ~ PROBEID, 
@@ -391,15 +395,14 @@ genes = merge(entrez, symbol, by = 'PROBEID', all = TRUE)
 <a name="illum"/> 
 
 ### Process Illumina Data
-Downloaded non-normalized text files for each study utilizing Illumina are stored in folders and named after the study GSE Accession identifier. Each text file contains a probe summary profile. Processing Illumina data requires a few extra steps, specifically, we must know which files represent targets and which represent controls prior to reading in the data. The text files within each study-specific directory are converted to an Elist object and quantile normalized, background corrected using negative controls, and $log_2$ transformed. Filtering was also performed and all genes with expression levels below the first quartile are removed. The general workflow for processing BeadArray data described in the [limma User Guide](http://www.bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf) was used.
+Downloaded non-normalized text files for each study utilizing Illumina are stored in folders and named using the study GSE Accession ID. Each text file contains a probe summary profile. Processing Illumina data requires a few extra steps, specifically, we must know which files represent targets and which represent controls prior to reading in the data. The text files within each study-specific directory are converted to an Elist object and quartile normalized, background corrected using negative controls, and $log_2$ transformed. Filtering was also performed and all genes with expression levels below the first quartile are removed.  Probes are re-annotated using current annotation files from Bioconductor. The general workflow for processing BeadArray data described in the [limma User Guide](http://www.bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf) was used.
 ```{r cache=FALSE, echo=TRUE, vmessage=FALSE, warning=FALSE, eval=TRUE}
-# load libraries
+## Load Libraries
 library(illuminaHumanv2.db)
 library(illuminaHumanv4.db)
 
 # import text files
 txt.files <- base::list.files(path = paste('Raw_GEO_Data/', id, sep=''), full.names=TRUE)
-
 
 # read in probes to access probe names
 probes = utils::read.table(txt.files, sep = '\t', header = TRUE)
@@ -425,7 +428,7 @@ graphics::boxplot(illum.bkg.exprs.norm.lg, col = brewer.pal(9, 'Set1'),
         cex.axis = 0.5, cex.lab = 0.65, las=2,
         ylab = TeX('$log_{2}$ Intensity'))
 
-## filtering
+## Filtering
 # summarize average gene expression values
 avg <- rowMeans(illum.bkg.exprs.norm.lg)
 sum = summary(avg)
@@ -464,7 +467,7 @@ write.table(exp, file = paste('GEO_Data/', id, '_clean_exp_data.txt', sep = ''),
 # rename saved file
 exprs_data_clean = exp_filt
 
-# Annotate Probes
+## Annotate Probes
 # print columns
 columns(illuminaHumanv2.db)
 
@@ -481,7 +484,6 @@ genes_annot <- AnnotationDbi::select(hugene20sttranscriptcluster.db,
                             keys=as.character(genes_a@featureData@data$PROBEID),
                                columns=c('SYMBOL', 'ENTREZID'), 
                                keytype='PROBEID')
-
 
 # aggregate 1:many mappings into single list
 entrez = aggregate(ENTREZID ~ PROBEID, 
@@ -500,7 +502,7 @@ genes = merge(entrez, symbol, by = 'PROBEID', all = TRUE)
 <a name="agil"/> 
 
 ### Process Agilent Data
-Downloaded raw text files for each study utilizing Agilent are stored in folders and named after the study GSE Accession identifier. In addition to the data files a targets text file is included. The text files within each study-specific directory are converted to an RGList object and loess normalized, background corrected, and $log_2$ transformed. Filtering was also performed and all genes with expression levels below the first quartile are removed. The general workflow for processing BeadArray data described in the [limma User Guide](http://matticklab.com/index.php?title=Two_channel_analysis_of_Agilent_microarray_data_with_Limma) and the [Mattick Lab Wiki](http://matticklab.com/index.php?title=Two_channel_analysis_of_Agilent_microarray_data_with_Limma).
+Downloaded raw text files for each study utilizing Agilent are stored in folders and named after the study GSE Accession ID. In addition to the data files, a targets text file is included. The text files within each study-specific directory are converted to an RGList object and are loess normalized, background corrected, and $log_2$ transformed. Filtering was also performed and all genes with expression levels below the first quartile are removed.  Probes are re-annotated using current annotation files from Bioconductor. The general workflow for processing BeadArray data described in the [limma User Guide](http://matticklab.com/index.php?title=Two_channel_analysis_of_Agilent_microarray_data_with_Limma) and the [Mattick Lab Wiki](http://matticklab.com/index.php?title=Two_channel_analysis_of_Agilent_microarray_data_with_Limma).
 ```{r cache=FALSE, echo=TRUE, vmessage=FALSE, warning=FALSE, eval=TRUE}
 # import targets
 targets <- limma::readTargets(paste('Raw_GEO_Data/', id, '/targets.txt', sep=''))
@@ -511,17 +513,17 @@ RG <- limma::read.maimages(targets,
                            path=paste('Raw_GEO_Data/', id, sep=''),
                            source="agilent.median")
 
-## Background
+## Background Correction
 agil.data.bkg <- limma::backgroundCorrect(RG, method="normexp", normexp.method = 'rma')
 
-## Normalize
+## Normalization
 agil.bkg.norm <- limma::normalizeWithinArrays(agil.data.bkg, method="loess")
 
 # average replicate spots
 agil.bkg.norm.avg <- avereps(agil.bkg.norm, 
                               ID=agil.bkg.norm$genes$ProbeName)
 
-# probes
+# set probes
 probes = agil.bkg.norm.avg$genes$ProbeName
 
 # extract log transformed expression matrix - green/red (aka control/PE)
@@ -535,7 +537,7 @@ graphics::boxplot(agil.bkg.norm.avg.lg.exprs, col = brewer.pal(9, 'Set1'),
         cex.axis = 0.5, cex.lab = 0.65, las=2,
         ylab = TeX('$log_{2}$ Intensity'))
 
-## filtering
+## Filtering
 # summarize average gene expression values
 avg <- rowMeans(agil.bkg.norm.avg.lg.exprs)
 sum = summary(avg)
@@ -575,7 +577,7 @@ write.table(exp, file = paste('GEO_Data/', id, '_clean_exp_data.txt', sep = ''),
 # rename saved file
 exprs_data_clean = exp_filt
 
-# Annotate Probes
+## Annotate Probes
 # read in annotation file downloaded from Agilent (9/4/2017)
 agilent_annotations.db <- read.table('RAW_GEO_Data/014850_D_AA_20070207.txt',
                                      header = TRUE,
@@ -602,7 +604,7 @@ genes = merge(entrez, symbol, by = 'ProbeID', all = TRUE)[-1,]
 <a name="abarray"/> 
 
 ### Process Applied Biosystems Genome Survey Data
-Downloaded raw text files for each study utilizing Applied Biosystems Genome Survey microarrays are stored in folders and named after the study GSE Accession identifier. IThis workflow is still underconstruction. The general workflow for processing BeadArray data described in the [ABarray User Guide](https://bioconductor.riken.jp/packages/3.0/bioc/vignettes/ABarray/inst/doc/ABarray.pdf).
+Downloaded raw text files for each study utilizing Applied Biosystems Genome Survey microarrays are stored in folders and named after the study GSE Accession ID. This workflow is still under construction. The general workflow for processing BeadArray data described in the [ABarray User Guide](https://bioconductor.riken.jp/packages/3.0/bioc/vignettes/ABarray/inst/doc/ABarray.pdf).
 ```{r cache=FALSE, echo=TRUE, vmessage=FALSE, warning=FALSE, eval=TRUE}
 # load libraries
 library(ABarray)
@@ -675,7 +677,7 @@ eset = ABarray(paste('Raw_GEO_Data/', id, '/merged_datafile.txt', sep=''),
 <a name="dea"/>  
 
 ### Differential Expression Analysis
-Differential expression analysis was performed on the pre-processed microarray data using limma ( [microarray](http://bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf)).
+Differential expression analysis was performed on the pre-processed microarray using limma ( [microarray](http://bioconductor.org/packages/release/bioc/vignettes/limma/inst/doc/usersguide.pdf)).
 ```{r cache=FALSE, echo=TRUE, error = FALSE, vmessage=FALSE, warning=FALSE, eval=TRUE}
 # create design matrix
 design <- stats::model.matrix(~ groups + 0, data.frame(exprs_data_clean))
@@ -708,10 +710,10 @@ knitr::kable(summary(top_dec_test))
 ## Process Results
 limma::write.fit(efit, top_dec_test, adjust='BH', file=paste('DE_Results/', id ,'_DEgenes.txt', sep = ''))
 ```
-The plot shows the up (red) and down (green) regulated differentially expressed genes between the samples.  
+ 
 
 ```{r cache=FALSE, echo=TRUE, vmessage=FALSE, warning=FALSE, eval=TRUE}
-## Visualize results
+## Visualize Results
 # MD plot
 plotMD(efit, column=1, status=top_dec_test[,1], main=colnames(efit)[1], cex = 0.7)
 
@@ -727,7 +729,7 @@ ggplot2::ggplot(data = results, aes(x = results$logFC, y = -log10(results$adj.P.
 ```
 
 ```{r cache=FALSE, echo=TRUE, vmessage=FALSE, warning=FALSE, eval=TRUE}
-# heatmap - top 100 genes
+## Heatmap - top 100 genes
 mvgenes = as.character(rownames(results)[1:100])
 c.sample <- EMA::clustering(data = exprs_data_clean[mvgenes, ], metric = 'pearson', method = 'ward')
 c.gene <- EMA::clustering(data = t(exprs_data_clean[mvgenes, ]), metric = 'pearson', method = 'ward')
@@ -741,23 +743,43 @@ EMA::clustering.plot(tree = c.sample, tree.sup = c.gene, data = exprs_data_clean
 <a name="metadata"/> 
 
 ## GEO Metadata Retrieval
-The GEO Metadata Database is used to retrieve important metadata about GEO data sets used in the current analysis. Specifically, the GES Accession identifier, study type (i.e., expression profiling by array, Expression profiling by high throughput sequencing), PubMed identifier, and the original date that the data was submitted to GEO.
-```{r warning=FALSE, cache=FALSE}
-# save metadata as data.frame
-metadata = do.call(rbind, lapply(gds@header, data.frame, stringsAsFactors=FALSE))
-colnames(metadata) <- id
+The GEO Metadata Database is used to retrieve important metadata about each GSE accession ID used in the current analysis.
+```{r warning=FALSE, cache=TRUE}
+# connect to database
+con <- DBI::dbConnect(SQLite(),'GEO_Database/GEOmetadb.sqlite')
 
-# print metadata
+# query database
+metadata <- DBI::dbGetQuery(con,'SELECT gse, pubmed_id, title, summary, submission_date, type, overall_design
+FROM gse
+WHERE gse IN (
+"GSE4707", 
+"GSE4707")')
+
+# print results
 knitr::kable(metadata)
 
-# to create groups
-gds@dataTable@columns$disease.state
+# replace tabs in strings with pipes
+metadata$title = gsub("\t", " | ", metadata$title)
+metadata$summary = gsub("\t", " | ", metadata$summary)
+metadata$type = gsub("\t", " | ", metadata$type)
+metadata$overall_design = gsub("\t", " | ", metadata$overall_design)
+
+# write metadata to csv
+write.table(metadata, 
+            'GEO_Data/GES_Metadata.txt', 
+            row.names = FALSE, 
+            quote = FALSE,
+            sep = '\t')
+
+# close db connection
+DBI::dbDisconnect(con)
 ```
 
 
 <a name="repo"/>  
 
-#### Session Information
+#### Reproducibility
+Print session information.
 ```{r eval=TRUE}
 sessionInfo()
 ```

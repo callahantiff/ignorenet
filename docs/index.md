@@ -8,8 +8,7 @@ Preeclampsia affects 3-8% of all pregnancies accounting for 18% of maternal deat
 <br>
 
 ### Approach
-<img src="https://github.com/callahantiff/ignorenet/blob/master/images/approach.png" width="800">
-
+<img src="ignorenet/docs/images/approach.png" alt="Figure 1" width="800"/>
 <br>
 
 ### Resources: Data, Software, and Tools

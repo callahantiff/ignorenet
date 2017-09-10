@@ -4,7 +4,7 @@
 Integrating biological knowledge with experimental data is vital for understanding the mechanisms underlying complex diseases and clinical phenotypes. Most genes differentially expressed in association with disease have no currently described disease-associated function in the literature ("ignorome") [1-2]. The current project aims to leverage existing linked open biomedical resources and software/tools and publicly available high-throughput data repositories to identify and annotate the function of uncharacterized disease-associated genes for a specific disease. This repository documents our efforts to reveal and annotate disease-specific ignoromes.
 
 #### BioHackathon 2017 Use Case
-Preeclampsia affects 3-8% of all pregnancies accounting for 18% of maternal deaths and 40% of fetal mortality [4]. The only existing cure for preeclampsia is placental delivery and preterm birth [3]. Preeclampsia is good candidate for the ignorome because it is a substantial public health burden, has an largely unknown etiology, clear clinical characteristics, is well represented by publicly availible data, and has insufficient existing mouse models.
+Preeclampsia affects 3-8% of all pregnancies accounting for 18% of maternal deaths and 40% of fetal mortality [3]. The only existing cure for preeclampsia is placental delivery and preterm birth [4]. Preeclampsia is good candidate for the ignorome because it is a substantial public health burden, has an largely unknown etiology, clear clinical characteristics, is well represented by publicly availible data, and has insufficient existing mouse models.
 <br>
 
 ### Approach

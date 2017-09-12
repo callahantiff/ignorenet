@@ -45,3 +45,5 @@
 .Rproj.user
 R/.RData
 R/.Rhistory
+
+*.iml

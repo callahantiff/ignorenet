@@ -4,83 +4,257 @@
 ### date: 07.11.17
 ################################################################## 
 
-# load needed libraries
+## LIBRARIES
 library(shiny)
+library(shinydashboard)
+library(rhandsontable)
+
+
+## PREPROCESSING
+# source preprocessing file
+source('GEO_Preprocessing.R')
 
 #################################
 ## User Interface
-ui <- fluidPage(
+ui <- dashboardPage(
   
-  # App title ----
-  titlePanel("Crappy Appy"),
+  # header
+  dashboardHeader(title = "ignornet"),
   
-  # Sidebar panel for inputs ----
-  sidebarPanel(
-  
-  #=================#
-  # INPUTS
-  # input1: selector for variable to plot against mpg ----
-  # variables must match the columns of the data
-  selectInput("variable", "Variable:", #user label
-              c("Cylinders" = "cyl",
-                "Transmission" = "am",
-                "Gears" = "gear")),
-  
-  # input2: checkbox for whether outliers should be included ----
-  checkboxInput("outliers", "Show Outliers", TRUE)
+  # sidebar
+  dashboardSidebar(
+    
+    # side menu
+    sidebarMenu(
+      # menuItem("Home", tabName = "home"),
+      menuItem("Query GEO", tabName = "dashboard"),
+      menuItem("Group Selection", tabName = "samp"),
+      menuItem("Differential Expression Analysis", tabName = "dea"),
+      menuItem("ignorenet", tabName = "net")
+    )
+    
 ),
   
-#===================#
-  # Main panel for displaying outputs ----
-  mainPanel(
+  # body
+  dashboardBody(
+    tags$head(tags$style(HTML('
+                          /* logo */
+                              .skin-blue .main-header .logo {
+                              background-color: white; color:        rgb(0,144,197);
+                              font-weight: bold;font-size: 24px;text-align: Right;
+                              }
+                              
+                              /* logo when hovered */
+                              
+                              .skin-blue .main-header .logo:hover {
+                              background-color: white;
+                              }
+                              
+                              
+                              /* navbar (rest of the header) */
+                              .skin-blue .main-header .navbar {
+                              background-color: white;
+                              }
+                              
+                              /* main sidebar */
+                              .skin-blue .main-sidebar {
+                              background-color: gray;;
+                              }
+                              
+                              /* active selected tab in the sidebarmenu */
+                              .skin-blue .main-sidebar .sidebar .sidebar-menu .active a{
+                              background-color: rgb(107,194,0);
+                              color: white;font-weight: bold;;
+                              }
+                              
+                              /* other links in the sidebarmenu */
+                              .skin-blue .main-sidebar .sidebar .sidebar-menu a{
+                              background-color: gray;
+                              color: white;font-weight: bold;
+                              }
+                              
+                              /* other links in the sidebarmenu when hovered */
+                              .skin-blue .main-sidebar .sidebar .sidebar-menu a:hover{
+                              background-color: rgb(232,245,251);color: rgb(0,144,197);font-weight: bold;
+                              }
+                              
+                              /* toggle button color  */
+                              .skin-blue .main-header .navbar .sidebar-toggle{
+                              background-color: white;color:rgb(0,144,197);
+                              }
+                              
+                              /* toggle button when hovered  */
+                              .skin-blue .main-header .navbar .sidebar-toggle:hover{
+                              background-color: rgb(0,144,197);color:white;
+                              }
+                              
+                              # '))),
     
-    # OUTPUTS
-    # output1: plot caption (h2 is the header size) ----
-    h3(textOutput("caption")),
+    # study tabs
+    tabItems(
     
-    # output2: plot ----
-    plotOutput("mpgPlot")
+    # home
+    # tabItem("home",
+    #         box(
+    #           width = 10, status = "info", solidHeader = TRUE,
+    #           title = "HOME PAGE NEEDS TEXT")),
     
-  )
-)
+    # GEO Study Search
+    tabItem("dashboard",
+            fluidRow(
+              
+              # selected identifiers
+              box(
+                width = 4, status = "info", solidHeader = TRUE,
+                title = "GEO Query Keywords",
+                shiny::textInput("disease", label="Disease"),
+                
+                shiny::selectizeInput(
+                  inputId = "org", 
+                  label = "Select Organism",
+                  multiple  = FALSE,
+                  choices = GEOChoices(),
+                  options = list(placeholder = 'Select an Organism')),
+                shiny::submitButton(text="Find Studies")),
+              
+              #run GEO query
+              box(
+                width = 4, status = "info", solidHeader = TRUE,
+                title = "Selected GSE Accession Identifiers",
+                tableOutput('rows_out'),
+                submitButton(text="Select GSE Identifiers")),
+              
+              # GEO results
+              box(
+                width = 10, status = "info", solidHeader = TRUE,
+                title = "GEO Results",
+                dataTableOutput('tbTable'))
+            )),
+      
+    # experimental sample selection
+    tabItem("samp",
+            box(
+              shiny::selectizeInput(
+              inputId = "gse", 
+              label = "Select A GSE Accession Identifier",
+              multiple  = FALSE,
+              choices = 'rows_out',
+              options = list(placeholder = 'Select a Study')),
+            
+            # shiny::submitButton(text="Next"),
+            shiny::submitButton(text="Analyze")
+            ),
+            
+            box(
+              width = 10, status = "info", solidHeader = TRUE,
+              title = "GSE Study Metadata",
+              rHandsontableOutput("hot")
+              
+            )),
+    
+    # differential expression analysis
+    tabItem("dea",
+            box(
+              submitButton(text="ignorenet"),
+              br(),
+              br(),
+              width = 15, status = "info", solidHeader = TRUE,
+              title = "Significantly Differentially Expressed Genes",
+              dataTableOutput('DEQtable')
+              ))
+)))
+
 
 #################################
 ## Server Implementation
+server <- function(input, output, session) {
+  values <- reactiveValues()
+  
+  ## TAB1: Querying GEO
+  # drop-down menu
+  observe({
+    updateSelectizeInput(session, 'org', choices = GEOChoices())
+    updateSelectizeInput(session, 'gse', choices = select_rows())
+  })
+  
+  # generate query output from inital text
+  data <- reactive({
+    GEOQuery(input$disease, input$org)})
+  
+  output$tbTable <- renderDataTable(
+    data(),
+    options = list(pageLength = 10),
+    escape = FALSE,
+    callback = "function(table) {
+    table.on('click.dt', 'tr', function() {
+    $(this).toggleClass('selected');
+    Shiny.onInputChange('rows',
+    table.rows('.selected').indexes().toArray());
+    });}")
+  
+  # generate list of choosen studies
+  select_rows <- reactive({
+    new_row = input$rows + 1
+    data()[new_row, ][1]})
 
-## data preprocessing
-# Tweak the "am" variable to have nicer factor labels -- since this
-# doesn't rely on any user inputs, we can do this once at startup
-# and then use the value throughout the lifetime of the app
-source("APP_Preprocessing/mtcars.R")
+  output$rows_out <- renderTable(
+    select_rows())
+  
+  ## TAB 2: Sample Selection
+    DF <- reactive({
+    DF <- read.table("example_data.txt", header = TRUE, sep = '\t', stringsAsFactors = FALSE)
+    DF$Group <- rep('enter group', nrow(DF))
 
-# Define server logic to plot various variables against mpg ----
-server <- function(input, output) {
+   return(DF)
+  })
+
   
-  # Compute the formula text for plot caption + plot ----
-  # This is in a reactive expression since it is shared by the
-  # output$caption and output$mpgPlot functions
-  formulaText <- reactive({
-    paste("mpg ~", input$variable)
+  ## Handsontable
+  observe({
+    if (!is.null(input$hot)) {
+      values[["previous"]] <- isolate(values[["DF"]])
+      DF = hot_to_r(input$hot)
+    } else {
+      if (is.null(values[["DF"]]))
+        DF <- DF()
+      else
+        DF <- values[["DF"]]
+    }
+    values[["DF"]] <- DF
   })
   
-  # plot caption ----
-  output$caption <- renderText({
-    paste("Plot: ", formulaText())
+  output$hot <- renderRHandsontable({
+    DF <- values[["DF"]]
+    if (!is.null(DF))
+      rhandsontable(DF, stretchH = "all")
   })
   
-  # Generate a plot of the requested variable against mpg ----
-  # and only exclude outliers if requested
-  output$mpgPlot <- renderPlot({
-    boxplot(as.formula(formulaText()),
-            data = mpgData,
-            outline = input$outliers,
-            col = "#75AADB", pch = 19)
+  ## Add column
+  output$ui_newcolname <- renderUI({
+    textInput("newcolumnname", "Name", sprintf("newcol%s", 1+ncol(values[["DF"]])))
   })
+  
+  observeEvent(input$addcolumn, {
+    DF <- isolate(values[["DF"]])
+    values[["previous"]] <- DF
+    newcolumn <- eval(parse(text=sprintf('%s(nrow(DF))', isolate(input$newcolumntype))))
+    values[["DF"]] <- setNames(cbind(DF, newcolumn, stringsAsFactors=FALSE), c(names(DF), isolate(input$newcolumnname)))
+  })
+
+  
+  ## TAB3: Differential Expression Analysis
+  # generate query output from inital text
+  dea_res <- reactive({
+    res <- read.table("DEA_results.tsv", sep = '\t', header = TRUE, stringsAsFactors = FALSE)
+    return(res)
+    })
+  
+  output$DEQtable <- renderDataTable(
+    dea_res())
   
 }
 
-
 #################################
 ## Run the application 
-shinyApp(ui = ui, server = server)
+shiny::shinyApp(ui = ui, server = server)
 

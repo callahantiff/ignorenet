@@ -22,17 +22,6 @@ Information will be updated soon...
 ## Contributing
 Please read [CONTRIBUTING.md](https://github.com/callahantiff/ignorenet/blob/master/CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
 
-## Versioning
-We use [SemVer](http://semver.org/) for versioning.
-
-## Contributing
-Please read [CONTRIBUTING.md](https://github.com/callahantiff/ignorenet/blob/master/CONTRIBUTING.md) for details on our code of conduct, and the process for submitting pull requests to us.
-
-## Versioning
-We use [SemVer](http://semver.org/) for versioning.
-
-## Testing
-
 ## Collaborators
 * University of Colorado Denver Anschutz Medical Campus (AMC)
 * Database Center for Life Science (DBCLS)

@@ -49,6 +49,54 @@ library(RColorBrewer)
 library(R.utils)
 ```
 
+<a name="studs"/>  
+## Query GEO for Studies Meeting Specific User Criteria
+```{r warning=FALSE, message=FALSE, eval=FALSE, cache=FALSE}
+# connect to database
+con <- DBI::dbConnect(SQLite(),'GEO_Database/GEOmetadb.sqlite')
+
+# query database
+metadata <- DBI::dbGetQuery(con,'SELECT gse, pubmed_id, title, summary, submission_date, type, overall_design
+FROM gse
+WHERE gse IN (
+"GSE4707",
+"GSE6573",
+"GSE10588",
+"GSE25906",
+"GSE14722",
+"GSE24129",
+"GSE30186",
+"GSE43942",
+"GSE47187",
+"GSE74341",
+"GSE35574",
+"GSE44711",
+"GSE60438",
+"GSE73374")')
+
+# print results
+knitr::kable(metadata)
+
+# replace tabs in strings with pipes
+metadata$title = base::gsub("\t", " | ", metadata$title)
+metadata$summary = base::gsub("\t", " | ", metadata$summary)
+metadata$type = base::gsub("\t", " | ", metadata$type)
+metadata$overall_design = base::gsub("\t", " | ", metadata$overall_design)
+
+# write metadata to csv
+utils::write.table(metadata, 
+            'GEO_Data/GES_Metadata.txt', 
+            row.names = FALSE, 
+            quote = FALSE,
+            sep = '\t')
+
+# close db connection
+DBI::dbDisconnect(con)
+
+
+```
+
+
 <a name="data1"/>   
 
 ## Accessing GEO Data: No Raw Data Availible
@@ -56,7 +104,7 @@ When there is no raw data available on GEO, the GEO Data Set (GDS) SOFT files ar
 ```{r warning=FALSE, message=FALSE, eval=FALSE, cache=FALSE}
 ## Download GDS
 # set GSE identifier
-id <- 'GDS2080'
+id <- 'GDS2080' #GSE4707
 
 # download GDS file
 url <- paste('ftp://ftp.ncbi.nlm.nih.gov/geo/datasets/',
@@ -106,8 +154,8 @@ exprs <- Biobase::exprs(eset)
 
 # get gene annotation information
 fset <- Biobase::fData(eset)
-GSE_genes = fset[,c(1, 4, 3)]
-names(GSE_genes) = c('Genes.identifier', 'Genes.ENTREZID', 'Genes.SYMBOL')
+genes = fset[,c(1, 4, 3)]
+names(genes) = c('Genes.identifier', 'Genes.ENTREZID', 'Genes.SYMBOL')
 
 
 ## GSE
@@ -122,12 +170,12 @@ Biobase::fvarLabels(gse_exp_set) <- make.names(Biobase::fvarLabels(gse_exp_set))
 exprs_data <- Biobase::exprs(gse_exp_set)
 
 # store gene names and samples
-GSE_genes = data.frame(rownames(exprs_data), 
+genes = data.frame(rownames(exprs_data), 
                        gse_data[[1]]@featureData@data$GeneID,
                        gse_data[[1]]@featureData@data$`Gene Symbol`)
 
 # name columns
-names(GSE_genes) = c('probe', 'Genes.ENTREZID', 'Genes.SYMBOL')
+names(genes) = c('probe', 'Genes.ENTREZID', 'Genes.SYMBOL')
 samples = colnames(exprs_data)
 
 # set group membership for all samples
@@ -158,8 +206,9 @@ Prior to determining which genes are differentially expressed, the preprocessing
 # preview data - verify that the data has been log2 transformed
 avg <- base::rowMeans(exprs)
 summary(avg)
+exprs_data <- exprs
 
-# if aglient, then data needs to be converted back to log2 from log10
+# if aglient, then data needs to be converted back to log2 from log10 (GSE4707)
 exprs_data <- base::log(10**exprs, 2)
 
 ## Checking for NAs
@@ -187,8 +236,8 @@ cutoff <- sum[2][[1]] # remove genes below first quantile
 exprs_data_clean = expFilter(exprs_data_clean, 
                      threshold = round(sum[2][[1]], 4))
 
-# remove genes with expression below first quantile
-cat('There are', dim(exprs_data_clean)[1], 'genes after removing', dim(affy.norm.exprs)[1]-dim(exprs_data_clean)[1], 'when filtering out genes with expresison values below the first quartile')
+# # remove genes with expression below first quantile
+cat('There are', dim(exprs_data_clean)[1], 'genes after removing', dim(exprs_data_cut)[1]-dim(exprs_data_clean)[1], 'when filtering out genes with expresison values below the first quartile')
 ```
 
 ```{r cache=FALSE, echo=TRUE, vmessage=FALSE, warning=FALSE, eval=TRUE}
@@ -310,7 +359,6 @@ affy.data = affy::ReadAffy(filenames = CEL.files)
 
 # for Affymetrix Human Gene 2.0 ST Array
 affy.data = oligo::read.celfiles(CEL.files)
-affy.norm = oligo::rma(affy.data)
 
 ## normalize the data
 affy.norm = affy::rma(affy.data)
@@ -365,7 +413,7 @@ exprs_data_clean = exp_filt
 columns(hugene20sttranscriptcluster.db)
 
 # annotate genes
-genes_annot <- AnnotationDbi::select(hugene20sttranscriptcluster.db, 
+genes_annot <- AnnotationDbi::select(hgu133plus2.db, 
                                keys=rownames(exprs_data_clean),
                                columns=c('SYMBOL', 'ENTREZID'), 
                                keytype='PROBEID')
@@ -532,6 +580,9 @@ agil.bkg.norm.avg.lg.exprs = limma::exprs.MA(agil.bkg.norm.avg)
 # label expression matrix rows
 rownames(agil.bkg.norm.avg.lg.exprs) <- probes
 
+# remove probes that are controls
+agil.bkg.norm.avg.lg.exprs <- agil.bkg.norm.avg.lg.exprs[ rownames(agil.bkg.norm.avg.lg.exprs) %in% fset$ID, ]
+
 # normalized intensity values boxplot
 graphics::boxplot(agil.bkg.norm.avg.lg.exprs, col = brewer.pal(9, 'Set1'), 
         cex.axis = 0.5, cex.lab = 0.65, las=2,
@@ -548,7 +599,7 @@ exp_filt = expFilter(agil.bkg.norm.avg.lg.exprs,
                      threshold = round(sum[2][[1]], 4))
 
 # remove genes below first quantile
-cat('There are', dim(exp_filt)[1], 'genes after removing', dim(affy.norm.exprs)[1]-dim(exp_filt)[1], 'when filtering out genes with expresison values below the first quartile')
+cat('There are', dim(exp_filt)[1], 'genes after removing', dim(agil.bkg.norm.avg.lg.exprs)[1]-dim(exp_filt)[1], 'when filtering out genes with expresison values below the first quartile')
 
 # cluster expression data by sample
 sample = EMA::clustering(data = exp_filt, metric = 'pearson', method = 'average')
@@ -686,8 +737,7 @@ design
 
 # create constrast (the one we subtract is control, then we interpret results for cases)
 contr.matrix <- limma::makeContrasts(
-   EOvsC = EO-Control,
-   LOvsC = LO-Control,
+   PEvsC = PE-control,
    levels = colnames(design))
 contr.matrix
 
@@ -749,23 +799,8 @@ The GEO Metadata Database is used to retrieve important metadata about each GSE 
 con <- DBI::dbConnect(SQLite(),'GEO_Database/GEOmetadb.sqlite')
 
 # query database
-metadata <- DBI::dbGetQuery(con,'SELECT gse, pubmed_id, title, summary, submission_date, type, overall_design
-FROM gse
-WHERE gse IN (
-"GSE4707",
-"GSE6573",
-"GSE10588",
-"GSE25906",
-"GSE14722",
-"GSE24129",
-"GSE30186",
-"GSE43942",
-"GSE47187",
-"GSE74341",
-"GSE35574",
-"GSE44711",
-"GSE60438",
-"GSE73374")')
+metadata <- DBI::dbGetQuery(con,'SELECT DISTINCT organism
+FROM gpl')
 
 # print results
 knitr::kable(metadata)
@@ -794,4 +829,121 @@ DBI::dbDisconnect(con)
 Print session information.
 ```{r eval=TRUE}
 sessionInfo()
+```
+
+
+```{r}
+
+# list files in a directory
+file_list <- base::list.files(path = 'DE_Results/', full.names=TRUE)
+
+# read in gene data
+for (file in file_list){
+  # if the merged dataset doesn't exist, create it
+  if (!exists("DE_genes")){
+    dataset <- read.table(file, header=TRUE)
+  }
+   
+  # if the merged dataset does exist, append to it
+  if (exists("DE_genes")){
+    temp_dataset <-read.table(file, header=TRUE)
+    dataset<-rbind(dataset, temp_dataset)
+    rm(temp_dataset)
+  }
+ 
+}
+
+genes12= read.table("DE_Results/GSE74341_DEgenes.txt", header = TRUE, "\t")
+
+genes = unique(genes7$Genes.SYMBOL)
+
+write.table(genes, 'PE_genes.txt', row.names = FALSE, col.names = FALSE)
+
+
+endpoint = 'http://amc-tantor.ucdenver.pvt:10035/repositories/kabob_prod_sep2017'
+
+
+# create query statement
+query <- "
+prefix franzOption_chunkProcessingAllowed: <franz:yes>
+prefix franzOption_clauseReorderer: <franz:identity>
+PREFIX franzOption_memoryLimit: <franz:60g>
+PREFIX franzOption_memoryExhaustionWarningPercentage: <franz:90.0>
+
+PREFIX obo_pr: <http://purl.obolibrary.org/obo/pr#>
+PREFIX ccp: <http://ccp.ucdenver.edu/obo/ext/>
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+
+# Drug interacts with protein encoded by gene with association to disease/phenotype.
+
+select * {
+  # Start by finding the 'drug' class in bioworld, 
+  # then get all potential drugs within bioworld (subclasses of the 'drug' class).
+  ccp:CHEBI_23888 obo:IAO_0000219 ?drug_bioentity . # CHEBI_23888 = CHEBI:drug; IAO_0000219 = IAO:denotes
+  filter (?drug_bioentity != obo:CHEBI_23888) # CHEBI_23888 = CHEBI:drug
+  ?drug rdfs:subClassOf ?drug_bioentity .
+  ?drug_ice obo:IAO_0000219 ?drug .
+  
+  # Find drugs that are involved in has_participant restrictions 
+  # as the object of owl:someValuesFrom relations.
+  ?drug_sc rdfs:subClassOf ?drug .
+  ?drug_participant_r owl:someValuesFrom ?drug_sc .
+  ?drug_participant_r rdf:type owl:Restriction .
+  ?drug_participant_r owl:onProperty ?has_participant .
+  ccp:RO_0000057 obo:IAO_0000219 ?has_participant . # RO_0000057 = RO:has_participant; IAO_0000219 = IAO:denotes
+  filter (?has_participant != obo:RO_0000057) #RO_0000057 = RO:has_participant
+  
+  # Ee are looking for drug-target interactions, so here we ensure the 
+  # has_participant restriction is an attribute of a 'binding' event.
+  ?binding_event rdfs:subClassOf ?drug_participant_r .
+  ?binding_event rdfs:subClassOf ?binding .
+  ccp:GO_0005488 obo:IAO_0000219 ?binding . # GO_0005488 = GO:binding; IAO_0000219 = IAO:denotes
+  filter (?binding != obo:GO_0005488) # GO_0005488 = GO:binding
+  ?binding_ice obo:IAO_0000219 ?binding .
+  
+  # Now find other participants in the binding event (most likely target proteins).
+  ?binding_event rdfs:subClassOf ?target_participant_r .
+  ?target_participant_r rdf:type owl:Restriction .
+  ?target_participant_r owl:onProperty ?has_participant .
+  ?target_participant_r owl:someValuesFrom ?target_sc .
+  ?target_sc rdfs:subClassOf ?target .
+  ?target_ice obo:IAO_0000219 ?target . # return ICE identifier
+  
+  # From the target, find any genes that are templates for the drug targets
+  # by following has_gene_template restrictions. Note that the has_gene_template
+  # restrictions work on the canonical bioentities themselves (and not subclasses
+  # of the canonical bioentities).
+  ?target rdfs:subClassOf ?has_gene_template_r .
+  ?has_gene_template_r rdf:type owl:Restriction .
+  ?has_gene_template_r owl:onProperty ?has_gene_template .
+  <http://ccp.ucdenver.edu/obo/ext/pr#has_gene_template> obo:IAO_0000219 ?has_gene_template . # IAO_0000219 = IAO:denotes
+  filter(?has_gene_template != <http://purl.obolibrary.org/obo/pr#has_gene_template>)
+  ?has_gene_template_r owl:someValuesFrom ?gene .
+  ?gene_ice obo:IAO_0000219 ?gene .
+  
+  # Find things that the gene causes_or_contributes_to. Currently results will be 
+  # limited to phenotypes b/c that is what is currently represented in kabob.
+  ?gene_sc rdfs:subClassOf ?gene .
+  ?gene_sc rdfs:subClassOf ?cause_r . 
+  ?cause_r rdf:type owl:Restriction .
+  ?cause_r owl:onProperty ?causes_or_contributes_to_condition .
+  ccp:RO_0003302 obo:IAO_0000219 ?causes_or_contributes_to_condition . # RO_0003302 = RO:causes_or_contributes_to; IAO_0000219 = IAO:denotes
+  filter (?causes_or_contributes_to_condition != obo:RO_0003302) # RO_0003302 = RO:causes_or_contributes_to
+  ?cause_r owl:someValuesFrom ?phenotype_sc .
+  ?phenotype_sc rdfs:subClassOf ?phenotype .
+  ?phenotype_ice obo:IAO_0000219 ?phenotype .
+  
+  # collect labels to return
+  ?drug rdfs:label ?drug_label .
+  ?target rdfs:label ?target_label .
+  ?phenotype rdfs:label ?phenotype_label .
+  ?gene rdfs:label ?gene_label .
+  
+  }"
+
+ 
+# Step 2 - Use SPARQL package to submit query and save results to a data frame
+qd <- SPARQL(endpoint,query)
+df <- qd$results
+
 ```

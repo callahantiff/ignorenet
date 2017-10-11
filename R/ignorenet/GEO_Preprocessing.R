@@ -112,7 +112,19 @@ GEOQuery <- function(text1, text2) {
 # # http://wiki.bits.vib.be/index.php/Analyse_GEO2R_data_with_R_and_Bioconductor
 # 
 # ## USE CASE
-# # gse_ids = c("GSE4707", "GSE35574", "GSE10588", "GSE25906", "GSE14722","GSE74341", "GSE44711", "GSE60438")
+gse_ids = c("GSE4707",
+            "GSE6573",
+            "GSE10588", 
+            "GSE25906", 
+            "GSE14722",
+            "GSE24129",
+            "GSE30186",
+            "GSE47187",
+            "GSE74341", 
+            "GSE35574",
+            "GSE44711", 
+            "GSE60438",
+            "GSE73374")
 # 
 # Get GEO data
 GEOData <- function(ID) {
@@ -274,6 +286,11 @@ GEO_preprocess <- function(gset) {
 
 # Access group assignments - harded coded for now, will need to be updated
 Targets <- function(ID, gset){
+  # 
+  # if(!is.null(gset@phenoData@data$title)){
+  #   
+  #   
+  # }
 
   if(ID == 'GSE25906') {
     groups = as.character(lapply(as.character(gset@phenoData@data$characteristics_ch1.2), function(x) ifelse(length(grep('pree', x)) == 1, 'Case', 'Control')))
@@ -287,7 +304,11 @@ Targets <- function(ID, gset){
   }
   
   if(ID =='GSE4707') {
-    groups = as.character(lapply(as.character(gset@phenoData@data$title), function(x) ifelse(length(grep('PE', x)) == 1, 'Case', 'Control')))
+    groups = as.character(gset@phenoData@data$title)
+    
+    groups = as.character(lapply(groups, function(x) ifelse(length(grep('EO', x)) == 1, 'EO', x)))
+    groups = as.character(lapply(groups, function(x) ifelse(length(grep('LO', x)) == 1, 'LO', x)))
+    groups = as.character(lapply(groups, function(x) ifelse(length(grep('_n', x)) == 1, 'Control', x)))
   }
   
   if(ID == 'GSE74341') {

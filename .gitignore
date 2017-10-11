@@ -19,9 +19,14 @@
 *R/GEO_database.R
 *R/Biohackathon_GEO_Microarray_RNASeq.nb.html
 *R/Biohackathon_GEO_Microarray_RNASeq.Rmd
+*R/Biohackathon_GEO_Full_pipeline.nb.html
+*R/Biohackathon_GEO_Full_pipeline.Rmd
 *R/Biohackathon_GEO_Microarray.nb.html
 *R/Biohackathon_GEO_Microarray.Rmd
 *R/Biohackathon_GEO.Rmd
+R/ignorenet/APP_Preprocessing/mtcars.R
+*R/ignorenet/GEO_Data
+*R/Raw_GEO_Data
 
 # Packages #
 ############
@@ -48,4 +53,4 @@ R/.Rhistory
 
 *.iml
 
-R/ignorenet/APP_Preprocessing/mtcars.R
+

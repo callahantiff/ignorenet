@@ -47,3 +47,5 @@ R/.RData
 R/.Rhistory
 
 *.iml
+
+R/ignorenet/APP_Preprocessing/mtcars.R

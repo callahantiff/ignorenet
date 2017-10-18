@@ -27,6 +27,7 @@
 R/ignorenet/APP_Preprocessing/mtcars.R
 *R/ignorenet/GEO_Data
 *R/Raw_GEO_Data
+*R/ignorenet/delete me.R
 
 # Packages #
 ############

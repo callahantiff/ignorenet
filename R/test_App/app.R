@@ -1,86 +1,91 @@
-################################################################## 
-### ignorenet: R Shiny App to generate disease-specific ignoromes
-### version 1.0.0
-### date: 07.11.17
-################################################################## 
-
-# load needed libraries
+library(rhandsontable)
 library(shiny)
+library(shinydashboard)
 
-#################################
-## User Interface
-ui <- fluidPage(
-  
-  # App title ----
-  titlePanel("Crappy Appy"),
-  
-  # Sidebar panel for inputs ----
-  sidebarPanel(
-  
-  #=================#
-  # INPUTS
-  # input1: selector for variable to plot against mpg ----
-  # variables must match the columns of the data
-  selectInput("variable", "Variable:", #user label
-              c("Cylinders" = "cyl",
-                "Transmission" = "am",
-                "Gears" = "gear")),
-  
-  # input2: checkbox for whether outliers should be included ----
-  checkboxInput("outliers", "Show Outliers", TRUE)
-),
-  
-#===================#
-  # Main panel for displaying outputs ----
-  mainPanel(
+
+  ui <- dashboardPage(
     
-    # OUTPUTS
-    # output1: plot caption (h2 is the header size) ----
-    h3(textOutput("caption")),
+    # header
+    dashboardHeader(title = "ignornet"),
     
-    # output2: plot ----
-    plotOutput("mpgPlot")
+    # sidebar
+    dashboardSidebar(
+      
+      # side menu
+      sidebarMenu(
+        # menuItem("Home", tabName = "home"),
+        menuItem("Query GEO", tabName = "dashboard"),
+        menuItem("Differential Expression Analysis", tabName = "dea")
+      )
+      
+    ),
     
+    dashboardBody(
+      box(
+        width = 6, status = "info", solidHeader = TRUE,
+        title = "GSE Study Groups",
+          div(class='row', 
+              div(class="col-sm-5", 
+                  uiOutput("ui_newcolname"),
+                  actionButton("addcolumn", "Add")),
+              div(class="col-sm-4", 
+                  radioButtons("newcolumntype", "Type", c("integer", "double", "character"))),
+              div(class="col-sm-3"))),
+        
+        box(
+          width = 10, status = "info", solidHeader = TRUE,
+          title = "GSE Study Metadata",
+          actionButton("cancel", "Cancel last action"),
+          rHandsontableOutput("hot")
+        
+      )
+    )
   )
-)
-
-#################################
-## Server Implementation
-
-## data preprocessing
-# Tweak the "am" variable to have nicer factor labels -- since this
-# doesn't rely on any user inputs, we can do this once at startup
-# and then use the value throughout the lifetime of the app
-source("APP_Preprocessing/mtcars.R")
-
-# Define server logic to plot various variables against mpg ----
-server <- function(input, output) {
   
-  # Compute the formula text for plot caption + plot ----
-  # This is in a reactive expression since it is shared by the
-  # output$caption and output$mpgPlot functions
-  formulaText <- reactive({
-    paste("mpg ~", input$variable)
+  server <- shinyServer(function(input, output) {
+    values <- reactiveValues()
+    
+    DF <- reactive({
+      DF <- data.frame(Value = 1:10, Status = TRUE, Name = LETTERS[1:10],
+                       Date = seq(from = Sys.Date(), by = "days", length.out = 10),
+                       stringsAsFactors = FALSE)
+      
+      return(DF)
+    })
+    
+    ## Handsontable
+    observe({
+      if (!is.null(input$hot)) {
+        values[["previous"]] <- isolate(values[["DF"]])
+        DF = hot_to_r(input$hot)
+      } else {
+        if (is.null(values[["DF"]]))
+          DF <- DF()
+        else
+          DF <- values[["DF"]]
+      }
+      values[["DF"]] <- DF
+    })
+  
+    output$hot <- renderRHandsontable({
+      DF <- values[["DF"]]
+      if (!is.null(DF))
+        rhandsontable(DF, stretchH = "all")
+    })
+    
+    ## Add column
+    output$ui_newcolname <- renderUI({
+      textInput("newcolumnname", "Name", sprintf("newcol%s", 1+ncol(values[["DF"]])))
+    })
+    
+    observeEvent(input$addcolumn, {
+      DF <- isolate(values[["DF"]])
+      values[["previous"]] <- DF
+      newcolumn <- eval(parse(text=sprintf('%s(nrow(DF))', isolate(input$newcolumntype))))
+      values[["DF"]] <- setNames(cbind(DF, newcolumn, stringsAsFactors=FALSE), c(names(DF), isolate(input$newcolumnname)))
+    })
+    
   })
   
-  # plot caption ----
-  output$caption <- renderText({
-    paste("Plot: ", formulaText())
-  })
-  
-  # Generate a plot of the requested variable against mpg ----
-  # and only exclude outliers if requested
-  output$mpgPlot <- renderPlot({
-    boxplot(as.formula(formulaText()),
-            data = mpgData,
-            outline = input$outliers,
-            col = "#75AADB", pch = 19)
-  })
-  
-}
-
-
-#################################
-## Run the application 
-shinyApp(ui = ui, server = server)
-
+  ## run app 
+runApp(list(ui=ui, server=server))

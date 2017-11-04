@@ -19,7 +19,7 @@ source('GEO_Preprocessing.R')
 ui <- dashboardPage(
   
   # header
-  dashboardHeader(title = "ignornet"),
+  dashboardHeader(title = "ignorenet"),
   
   # sidebar
   dashboardSidebar(

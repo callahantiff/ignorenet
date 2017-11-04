@@ -1,8 +1,26 @@
-# import the library
+#########################################################################################
+### PubTator - code to retrieve abstracts from PubMed and run PubTator (adapted from Andrey Soares)
+### version 1.2.0
+### date: 10.11.17
+#########################################################################################
+
+
 # load needed libraries
-library(rentrez); library(RISmed); library(RCurl); library(XML); library(plyr); library(data.table); library(dplyr); library(org.Hs.eg.db); library(plyr); library(quanteda); library(openNLP); library(NLP)
+library(rentrez)
+library(RISmed)
+library(RCurl)
+library(XML)
+library(plyr)
+library(data.table)
+library(dplyr)
+library(plyr)
+library(quanteda)
+library(openNLP)
+library(NLP)
+library(annotate)
+library(org.Hs.eg.db)
 
-
+##########################################
 # retrieve pubmed abstracts and titles for pmids in data set
 getPubmedAbstracts <- function(pmids) {
   # Load required package
@@ -25,93 +43,169 @@ getPubmedAbstracts <- function(pmids) {
   df
 }
 
-
+##########################################
 # search results and return genes list
-getPubtatorMatches <- function(abstracts,
-                               info = c("Genes", "Diseases", "Mutations", "Chemicals", "Species")) {
-  
-  #-------------------------------------------------
-  # Function to perform regular expression to a sentence
-  findInSentences <- function(sentence, symbols) {
-    tryCatch({
-      # match patterns and returns sentences that have at least two matches within the same sentence
-      ifelse(!is.null(symbols) & length(which(gregexpr(paste(tolower(symbols), collapse = "|"), tolower(sentence))[[1]] > 0)) > 1, sentence[[1]], "")
-    },error = function(e) {
-      # if the regular expression has an error, return the following error message
-      "*** REGEX ERROR ***"
-    })
-  }
-  
+getPubtatorMatches <- function(data,
+                               info = c("Genes", "Diseases", "Mutations", "Chemicals", "Species"),
+                               dir) {
+
   # Load required package
   require(pubmed.mineR, quietly = TRUE) && require(plyr, quietly = TRUE)
   
   # Loop through each abstract
-  df <- plyr::ddply(abstracts, .(PMID), function(abstract) {
+  df <- data.frame(PMID = rep(NA, nrow(pubmed_res_filt)), 
+                   gene = rep(NA, nrow(pubmed_res_filt)),
+                   disease = rep(NA, nrow(pubmed_res_filt)),
+                   mutation = rep(NA, nrow(pubmed_res_filt)),
+                   species = rep(NA, nrow(pubmed_res_filt)), 
+                   sentence = rep(NA, nrow(pubmed_res_filt))) 
+  
+  # create window to chunk data by
+  pause <- seq(200, nrow(data), 200)
+  
+  # loop over data
+  for (i in 1:nrow(data)) {
+    print(i)
+    
+    # for chunk processing
+    if(length(grep(paste("^",i,"$", sep=''), pause)) > 0) {
+      # write dataset to file
+      write.table(df, 
+                  paste(dir, 'Pubtator_', i, '_results.txt', sep = ''), 
+                  sep = '\t', quote = FALSE, col.names = TRUE, row.names = FALSE)
+      
+      # pause system for 1 minute
+      Sys.sleep(120)
+    }
+    
+    # save row to variable 
+    abstract <- data[i,]
     
     # extract PubTator information from selected abstract
-    # pubtator_output <- pubmed.mineR::pubtator_function(abstract["PMID"])
-    pubtator_output = NULL
-    
-    while(!inherits(pubtator_output,'list')) {
-      pubtator_output <- tryCatch(
-        pubmed.mineR::pubtator_function(abstract["PMID"]),
-        error=function(e) {Sys.sleep(10); message('retrying');
-          return(e)})
-    }
-    
-    # Check what PubTator information to use for list of symbols.
-    # The user can define any or all types: Genes, Diseases, Mutations, Chemicals and Species
-    symbols <- c()
-    for(pubType in c("Genes", "Diseases", "Mutations", "Chemicals", "Species")) {
-      if(tolower(pubType) %in% tolower(info) & !is.null(pubtator_output[pubType][[1]])){
-        symbols <- c(symbols, pubtator_output[pubType][[1]])
-      }
-    }
-    
+    pubtator_output <- pubmed.mineR::pubtator_function(abstract["PMID"])
+
+  # Create a data frame with all symbols found, corresponding title and sentences
+  if (length(pubtator_output) != 1) {
     # Separate the abstract in different sentences
     sentences <- pubmed.mineR::SentenceToken(abstract["Abstract"])
-    
-    # Loop throught the sentences and find matches of symbols
-    sent <- plyr::laply(sentences, findInSentences, symbols = symbols)
-    
+  
     # Remove sentence with no matches
-    sent <- sent[sent!=""]
+    sentences <- sentences[sentences!=""]
+    keep_sent <- sentences
+
+    # # loop over sentences and find those where a gene and disease co-occur
+    # keep_sent <- c()
+    # for (i in 1:length(sentences)) {
+    #   sent <- sentences[[i]]
+    # 
+    #   if (any(lapply(pubtator_output[[1]], function(x) length(agrep(x, sent))) > 0)
+    #       && any(lapply(pubtator_output[[2]], function(x) length(agrep(x, sent))) > 0)) {
+    #     keep_sent <- c(keep_sent, sent)
+    #   }
+    # }
     
-    # find matches in the title of the abstract
-    title <- findInSentences(abstract["Title"], symbols)
+    # save output to data frame
+    df[i, 1] <- abstract$PMID
+    df[i, 2] <- ifelse(!is.null(pubtator_output[[1]]), paste(pubtator_output[[1]], collapse = " | "), NA)
+    df[i, 3] <- ifelse(!is.null(pubtator_output[[2]]), paste(pubtator_output[[2]], collapse = " | "), NA)
+    df[i, 4] <- ifelse(!is.null(pubtator_output[[3]]), paste(pubtator_output[[3]], collapse = " | "), NA)
+    df[i, 5] <- ifelse(!is.null(pubtator_output[[5]]), paste(pubtator_output[[5]], collapse = " | "), NA)
+    df[i, 6] <- ifelse(paste(keep_sent, collapse = "|") != "", paste(keep_sent, collapse = "|"), NA)
     
-    # Create a data frame with all symbols found, corresponding title and sentences
-    data.frame(symbols=paste(symbols, collapse = "|"), title=title, sentences=paste(sent, collapse = "|"))
-  }, .progress = "text")
+  }
+  else {
+    df[i, 1] <- abstract$PMID
+    df[i, 2] <- NA
+    df[i, 3] <- NA
+    df[i, 4] <- NA
+    df[i, 5] <- NA
+    df[i, 6] <- NA
+  }
+  
+  }
   
   # Order data frame by PMIDs
   df <- df[order(df$PMID),]
   
-  # 0 = no match, no symbols found by Pubtator, or REGEX ERROR in the sentences
-  # 1 = Match at least 2 symbols in one sentence/title
-  df$match <- ifelse(df$symbols == "" | df$sentences == "" | grepl("REGEX ERROR", df$sentences), 0, 1)
-  
-  # Return data frame with Pubtator matches
-  df
+  # write out the last chunk of processed data
+  write.table(df, 
+              paste(dir, 'Pubtator_', nrow(data), '_results.txt', sep = ''), 
+              sep = '\t', quote = FALSE, col.names = TRUE, row.names = FALSE)
+  }
+
+
+##########################################
+# Process gene list from PubTator results
+results_process <- function(data, chunks) {
+  # parse results to create a single gene list
+  for (i in 1:nrow(data)) {
+    keep_genes <- c()
+    print(i)
+    genes <- strsplit(pubtator_noNA[i,2], "[|]")
+    
+    # for chunk processing
+    if(length(grep(paste("^",i,"$", sep=''), chunks)) > 0) {
+      
+      # pause system for 1 minute
+      Sys.sleep(120)
+    }
+    
+    for (j in 1:length(genes[[1]])) {
+      # cat("j", j)
+      gene2 <- sub('\\)|\\(', "", trimws(genes[[1]][j]))
+      # print(gene2)
+      
+      if (length(grep(gene2, " ")) > 0 | nchar(gene2) > 7 | grepl("^[[:lower:]]+$", gene2)) {
+        
+        # convert protein name to gene identifier
+        prot = paste(gene2, "[PROT]", sep = "")
+        protein_number = rentrez::entrez_search(db="protein", term=prot)
+        
+        if(length(protein_number$ids) > 0) {
+          protein_links <- rentrez::entrez_link(dbfrom='protein', id=as.numeric(protein_number$ids[1]), db='all')
+          
+          if(is.null(protein_links$links$protein_genome) && is.null(protein_links$links$protein_gene)) {
+            protein_links <- gene2}
+          else {
+            protein_links <- ifelse(!is.null(protein_links$links$protein_gene),
+                                    protein_links$links$protein_gene, protein_links$links$protein_genome)}
+          
+          # get annotations
+          if(is.na(suppressWarnings(as.numeric(protein_links)))) {
+            # check to convert roman numerals in gene names
+            rom <- suppressWarnings(gsub(as.roman(strsplit(protein_links, " ")[[1]][length(strsplit(protein_links, " ")[[1]])]), 
+                                         as.numeric(as.roman(strsplit(protein_links, " ")[[1]][length(strsplit(protein_links, " ")[[1]])])),
+                                         protein_links))
+            
+            protein_links <- ifelse(is.na(rom), protein_links, rom)
+            
+            # annotate genes using either gene name or entrez id
+            protein_links <- tryCatch(AnnotationDbi::select(org.Hs.eg.db, keys=as.character(sub('-', ' ', protein_links)), columns=c('ENTREZID'), keytype='GENENAME'), error = function(e) NULL)
+            # remove NA
+            protein_links <- ifelse(is.null(protein_links), "", as.numeric(protein_links$ENTREZID))
+            
+            keep_genes <- c(keep_genes, protein_links)}
+          else{keep_genes <- c(keep_genes, as.numeric(protein_links))}
+        }
+      }
+      
+      else {
+        # convert protein name to gene identifier
+        gene = paste(gene2, "[GENE]", sep = "")
+        gene_number = rentrez::entrez_search(db="gene", term=gene)
+        
+        if(length(gene_number$ids) > 0) {
+          gene_number <-  gene_number$ids[[1]]
+          keep_genes <- c(keep_genes, as.numeric(gene_number))}
+      }
+    }
+    
+    # get gene symbols
+    gene_annots <- tryCatch(AnnotationDbi::select(org.Hs.eg.db, keys=as.character(unique(keep_genes)), columns=c('SYMBOL'),
+                                                  keytype='ENTREZID'), error = function(e) NULL)
+    
+    # append solution to database as collapsed list
+    data$entrez[i] <- paste(unique(keep_genes), collapse = "|")
+    data$symbol[i] <- paste(unique(gene_annots$SYMBOL), collapse = "|")
+  }
 }
-
-# retrieve pubmed IDs matching specific search criteria
-r_search <- rentrez::entrez_search(db="pubmed", term="preeclampsia AND Homo Sapiens[ORGN]", retmax = 90000)
-
-
-# get the abstracts
-pubmed_res <- getPubmedAbstracts(r_search$ids)
-pubmed_res$Abstract[pubmed_res$Abstract == ""] <- NA
-pubmed_res_filt <- pubmed_res[complete.cases(pubmed_res$Abstract), ]
-
-# return gene annotations from PubAnnotation 
-pubtator <- getPubtatorMatches(pubmed_res_filt, info = c("Genes"))
-
-# Save the results
-saveRDS(gene_data_pairwise, "~/Dropbox/Papers-Conferences-Projects/Hackathons/BioHackathon 2017/ignorenet/R/PubMed_Results/pairwise_comparison_results.rds")
-
-# Load the results
-pairwise <- readRDS("~/Dropbox/Papers-Conferences-Projects/Hackathons/BioHackathon 2017/ignorenet/R/DE_Results/Final_fullcomp/pairwise_comparison_results.rds")
-
-
-

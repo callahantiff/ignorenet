@@ -1,0 +1,37 @@
+#Query retrieves annotations from the preeclampsia project
+
+PREFIX pubann:<http://pubannotation.org/ontology/>
+PREFIX rdfs:<http://www.w3.org/2000/01/rdf-schema#>
+PREFIX rdf:<http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+PREFIX owl:<http://www.w3.org/2002/07/owl#>
+PREFIX prj:<http://pubannotation.org/projects/>
+PREFIX tao:<http://pubannotation.org/ontology/tao.owl#>
+PREFIX xsd:<http://www.w3.org/2001/XMLSchema#>
+
+SELECT ?disease ?gene ?span_text ?doc
+WHERE {
+    # identify preeclampsia annotations and the spans that are denoted by
+	GRAPH prj:Preeclampsia {
+	 	?obj1 tao:denoted_by ?span1 .
+        ?obj1 a ?disease .
+      	FILTER (?disease != tao:Context_entity)
+	}
+    # identify gene annotations and the spans that are denoted by
+	GRAPH prj:preeclampsia_genes {
+	 	?obj2 tao:denoted_by ?span2 .
+        ?obj2 a ?gene .
+      	FILTER (?gene != tao:Context_entity)
+	}
+
+    # identify spans that contain both preeclampsia and gene annotations
+	?obj3 tao:denoted_by ?span3 .
+  	?obj3 a pubann:Sentence .
+    ?span3 tao:contains ?span1 .
+    ?span3 tao:contains ?span2 .
+    ?span3 tao:has_text ?span_text .
+
+    # return the document that contains the annotations
+    ?span3 tao:belongs_to ?doc .
+}
+GROUP BY ?disease ?gene ?span_text ?doc
+ORDER BY DESC(?doc)

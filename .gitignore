@@ -5,35 +5,19 @@
 
 # Directories #
 ########################
-**/R/GEO_Database/
-**/R/Biohackathon_GEO_cache
-**/R/Biohackathon_GEO_files
-**R/Raw_Geo_Data
-**R/GEO_Data
-*!R/GEO_Data/Metadata.txt
+Draft_Scripts
+R/DE_Results
+R/PubMed_Results/Annotations
+R/ignorenet/GEO_Database
+R/ignorenet/GEO_output
 
 # Scripts #
 ###########
-*R/Biohackathon_GEO.nb.html
-*R/GEO_Processing.ipynb
-*R/GEO_database.R
-*R/Biohackathon_GEO_Microarray_RNASeq.nb.html
-*R/Biohackathon_GEO_Microarray_RNASeq.Rmd
-*R/Biohackathon_GEO_Full_pipeline.nb.html
-*R/Biohackathon_GEO_Full_pipeline.Rmd
-*R/Biohackathon_GEO_Microarray.nb.html
-*R/Biohackathon_GEO_Microarray.Rmd
-*R/Biohackathon_GEO.Rmd
 R/ignorenet/APP_Preprocessing/mtcars.R
-*R/ignorenet/GEO_Data
-*R/Raw_GEO_Data
-*R/ignorenet/delete me.R
-*R/ignorenet/DE_Results/Annotations/PubTator_Results/text_files
-*R/DE_Results/Annotations/A-MEXP-1173.adf.txt
-*R/DE_Results/Annotations/A-GEOD-18096_comments.txt
-*R/DE_Results/Annotations/A-GEOD-17077_comments.txt
-*R/ignorenet/jdk_results.tsv
-*R/result.txt
+R/ignorenet/jdk_results.tsv
+R/ignorenet/GEO_DE_results.txt
+R/ignorenet/example_data.txt
+R/gene_union.txt
 
 # Packages #
 ############

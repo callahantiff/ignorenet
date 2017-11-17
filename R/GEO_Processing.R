@@ -7,6 +7,7 @@
 
 # LIBRARIES
 require(pacman)
+library(AnnotationDbi)
 library(annotate)
 library(Biobase)
 library(data.table)
@@ -829,9 +830,27 @@ Post_Process <- function(dir_loc) {
         dataset <- rbind(dataset, temp_dataset)
         rm(temp_dataset)}}
   }
+  # get entrez ids
+  # remove genes with NA
+  dataset <- dataset[complete.cases(dataset[3:5]),]
+  dataset$id <- rownames(dataset)
+  
+  # remove duplicate genes
+  dataset_updated = data.frame()
+  for (study in unique(dataset$group)){
+    # subset data by study
+    study_sub <- dataset[which(dataset$group==study), ]
+    
+    # remove duplicates
+    res <- study_sub[!duplicated(study_sub$symbol),]
+    
+    # append results to dataframe
+    dataset_updated <- rbind(dataset_updated, res)
+  }
+
   # re-set directory to original project location
   setwd("~/Dropbox/Papers-Conferences-Projects/Hackathons/BioHackathon 2017/ignorenet/R")
-  return(dataset)
+  return(dataset_updated)
   rm(dataset)
 }
 

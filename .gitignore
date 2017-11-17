@@ -10,17 +10,22 @@ R/DE_Results/*.txt
 R/DE_Results/*.xlsx
 R/DE_Results/Final_fullcomp/Old
 R/DE_Results/Final_studies/Old
-R/PubMed_Results/Annotations
+R/GEO_Data/Raw_GEO_data.zip
+#R/PubMed_Results/Annotations
+R/PubMed_Results/Annotations/Adrianne.zip
 R/ignorenet/GEO_Database
 R/ignorenet/GEO_output
+R/ignorenet/jdk_results.tsv
+R/ignorenet/GEO_DE_results.txt
+R/ignorenet/example_data.txt
+R/ignorenet/gene_union.txt
+R/ignorenet/DEA_results.tsv
+
 
 # Scripts #
 ###########
 R/ignorenet/APP_Preprocessing/mtcars.R
-R/ignorenet/jdk_results.tsv
-R/ignorenet/GEO_DE_results.txt
-R/ignorenet/example_data.txt
-R/gene_union.txt
+
 
 # Packages #
 ############

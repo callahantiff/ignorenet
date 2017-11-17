@@ -12,7 +12,7 @@ R/DE_Results/Final_fullcomp/Old
 R/DE_Results/Final_studies/Old
 !R/GEO_Data/Raw_GEO_data.zip
 R/GEO_Data/*.txt
-R/PubMed_Results/Annotations/PubTator_Results/text_files
+#R/PubMed_Results/Annotations/PubTator_Results/text_files
 R/PubMed_Results/Annotations/PubTator_Results/~$*
 R/PubMed_Results/Annotations/Adrianne.zip
 R/ignorenet/GEO_Database

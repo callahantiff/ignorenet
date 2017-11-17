@@ -6,7 +6,7 @@
 # Directories #
 ########################
 Draft_Scripts
-R/DE_Results/*.txt
+#R/DE_Results/*.txt
 R/DE_Results/*.xlsx
 R/DE_Results/Final_fullcomp/Old
 R/DE_Results/Final_studies/Old

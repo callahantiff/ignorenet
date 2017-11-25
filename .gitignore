@@ -22,6 +22,7 @@ R/ignorenet/GEO_DE_results.txt
 R/ignorenet/example_data.txt
 R/ignorenet/gene_union.txt
 R/ignorenet/DEA_results.tsv
+R/.RDataTmp
 
 
 # Scripts #

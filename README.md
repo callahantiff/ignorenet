@@ -1,5 +1,5 @@
 # ignorenet
-The ignorenet project aims to integrate existing linked open biomedical resources and software/tools with publicly available high-throughput data repositories to identify and annotate the function of uncharacterized disease-associated genes for a specific disease.
+This project integrates existing linked open biomedical resources and software/tools with publicly available high-throughput data repositories to identify and annotate the function of uninvestigated disease-associated genes. 
 
 ### Prerequisites
 This program was written on a system running OS X Sierra. Successful execution of this program requires Python version 2.7 and R 3.4.0.

@@ -1,54 +1,23 @@
-# ignorenet
+# Knowledge-Driven Mechanistic Enrichment of the Preeclampsia Ignorome
+## What is an Ignorome?
+The ignorome has been defined as the portion of a gene signature shown to be significantly associated with a specific disease, but without a published mechanistic link — and often without any published disease association. Recently, researchers seeking to answer questions like “what proportion of genes with intense and selective expression in specific tissues, cells, or systems are still almost completely uncharacterized with respect to biological function?”<sup>1</sup> and “In what ways do these functionally enigmatic genes differ from well-studied genes?”<sup>1</sup> discovered that in general, the top 5% of statistically significant differentially expressed genes (DEGs) were responsible for 70% of the published literature for a given disease<sup>1</sup>. Examining ignored genes in more detail, these researchers found that there were no differences between the published and ignored genes in terms of their connectivity in co-expression networks; the biggest factor as to whether or not a gene was well-represented in the literature was its date of discovery<sup>1</sup>.
+ 
 
-### Project Description
-Integrating biological knowledge with experimental data is vital for understanding the mechanisms underlying complex diseases and clinical phenotypes. Most genes differentially expressed in association with disease have no currently described disease-associated function in the literature ("ignorome") [1-2]. The current project aims to leverage existing linked open biomedical resources and software/tools and publicly available high-throughput data repositories to identify and annotate the function of uncharacterized disease-associated genes for a specific disease. This repository documents our efforts to reveal and annotate disease-specific ignoromes.
+<!-- *Callahan TJ, Baumgartner Jr WA, Bada M, Stefanski AL, Tripodi I, White EK, Hunter LE. OWL-NETS: Transforming OWL Representations for Improved Network Inference. In Pacific Symposium on Biocomputing. Pacific Symposium on Biocomputing 2018 (Vol. 23, p. 133). NIH Public Access. [PMC5737627](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5737627/)* -->
 
-#### BioHackathon 2017 Use Case
-Preeclampsia affects 3-8% of all pregnancies accounting for 18% of maternal deaths and 40% of fetal mortality [3]. The only existing cure for preeclampsia is placental delivery and preterm birth [4]. Preeclampsia is good candidate for the ignorome because it is a substantial public health burden, has an largely unknown etiology, clear clinical characteristics, is well represented by publicly availible data, and has insufficient existing mouse models.
+## Knowledge Graphs Provide Mechanistic Insight into Complex Biological Phenomena
+### Overview
+
+
+  
+
+
+
+
+
 <br>
 
-### Approach
-<img src="/ignorenet/images/approach.png" alt="" width="800"/>
-<br>
-
-### Resources: Data, Software, and Tools
-#### SPARQL Endpoints and RDF Code/Repositories
-  * [PubAnnotation](http://sparql.pubannotation.org/) [5]
-  * [DisGeNET](http://rdf.disgenet.org/sparql/) [6]
-  * [Orphanet](http://www.orpha.net/sparql) [7]
-  * The Knowledge Base of Biomedicine [8]
-  * Human Variant Database [9]
-
-#### Software and Tools
-  * [Colil](http://colil.dbcls.jp/browse/papers/)
-  * [PubCases](https://pubcases.dbcls.jp/)
-
-#### Public Data and Repositories
-  * [NCBI Gene Expression Omnibus](https://www.ncbi.nlm.nih.gov/geo/)
-
-#### Dependencies
-  * SPARQL Endpoint APIs
-      - Java
-      - Python
-  * Network Generation, Inference, and Visualization
-      - Python - Networkx
-      - Matlab
-      - Cytoscape
-  * Bioinformatic Analyses
-      - R + Bioconductor
-
-### Collaborators
-  * University of Colorado Denver Anschutz Medical Campus
-  * Database Center for Life Science
-  * University of Maryland, Baltimore County
+___
 
 #### References
-  1. Pandey AK et al. PLoS One. 2014:PMC3921226 
-  2. Riba et al. Sci Rep. 2016:PMC4838989 
-  3. Anderson et al. Placenta. 2012:PMID22197626 
-  4. [Preeclampsia Foundation](https://www.preeclampsia.org/)
-  5. [PubAnnotation](http://pubannotation.org/)
-  6. [DisGeNET](http://www.disgenet.org/web/DisGeNET/menu)
-  7. [Orphanet](http://www.orpha.net/consor/cgi-bin/index.php)
-  8. Livingston et al. BMC Bioinformatics. 2015:PMC4448321
-  9. Peterson et al. J Mol Biol. 2013:PMC3807015
+1. Pandey AK, Lu L, Wang X, Homayouni R, Williams RW. Functionally enigmatic genes: a case study of the brain ignorome. PLoS One. 2014;9(2):e88889. [PMID:24523945](https://pubmed.ncbi.nlm.nih.gov/24523945/)

@@ -15,17 +15,17 @@ ___
 The experimental design is highlighted in `Figure 1`.
 
 **Identification of the PE Molecular Signature**
-- A meta-analysis of domain expert-selected Gene Expression Omnibus (GEO)<sup>6</sup> studies. 
+- A meta-analysis of domain expert-selected [Gene Expression Omnibus (GEO)](https://www.ncbi.nlm.nih.gov/geo/) studies. 
 
 **Identification of Known PE-Associated Genes**  
-- **Literature-Driven.** Mine PubTator,<sup>7</sup> DisGeNET,<sup>8</sup> and Malacards.<sup>9</sup>  
+- **Literature-Driven.** Mine [PubTator](https://www.ncbi.nlm.nih.gov/research/pubtator/), [DisGeNET](https://www.disgenet.org/), and [Malacards](https://www.malacards.org/).  
 - **Gene-Driven.** Differentially expressed genes (DEGs) queried against PubAnntotation.
 
 The PE ignorome was identified as genes from the PE molecular signature with no known PE-association in the literature. 
 
 **PheKnowLator KG Enrichment**
-- Generate KG node embeddings using Walking RDF/OWL.<sup>10</sup>  
-- The 100 nearest KG concepts (gold circles, Figure 1) to each ignorome gene were identified, reviewed by domain experts, and compared to gene set enrichment results produced by ToppGene.<sup>11</sup>
+- Generate KG node embeddings using [Walking RDF/OWL](https://github.com/bio-ontology-research-group/walking-rdf-and-owl).  
+- The 100 nearest KG concepts (gold circles, `Figure 1`) to each ignorome gene were identified, reviewed by domain experts, and compared to gene set enrichment results produced by [ToppGene](https://toppgene.cchmc.org/help/publications.jsp).
 
 <img src="https://user-images.githubusercontent.com/8030363/177888222-0c5c5113-08d8-4603-86f9-49c8a29c61e2.png" width="600" height="400"/>
 
@@ -63,9 +63,11 @@ ____
 ____
 
 ### Data, Code, Gists, and Notebooks
-- [`Transcriptomic Metanalysis Notebook`](https://github.com/callahantiff/ignorenet/blob/master/notebooks/Biohackathon_GEO_Full_pipeline.nb.html). 
+- [`Transcriptomic Metanalysis Notebook`](https://github.com/callahantiff/ignorenet/blob/master/notebooks/Biohackathon_GEO_Full_pipeline.nb.html)   
 - [`Knowledge Graph Node Embeddings`](https://zenodo.org/record/3830982/files/embeddings.zip)  
-- [`Enrichment Analysis Script (GitHub Gist)`](https://gist.github.com/callahantiff/86d174f27838b5a6d243859fdd3b8e1b)
+- [`Enrichment Analysis Script (GitHub Gist)`](https://gist.github.com/callahantiff/86d174f27838b5a6d243859fdd3b8e1b)  
+
+**PheKnowLator Knowledge Graphs:** [`https://github.com/callahantiff/PheKnowLator`](https://github.com/callahantiff/PheKnowLator)  
 
 
 <br>
@@ -73,15 +75,8 @@ ____
 ___
 
 #### References
-1. Chaiworapongsa et al. Nat Rev Nephrol 10 (2014):466-80 
-2. Anderson et al. Placenta 33 (2012):S42-S47 
-3. Pandey et al. PLoS One 9 (2014):e88889 
-4. Riba et al. Sci Rep 6 (2016):24647 
-5. Callahan et al. Zenodo (2022):5716383 
-6. https://www.ncbi.nlm.nih.gov/geo/   
-7. https://www.ncbi.nlm.nih.gov/research/pubtator/    
-8. https://www.disgenet.org/   
-9. https://www.malacards.org/   
-10. https://github.com/bio-ontology-research-group/walking-rdf-and-owl   
-11. https://toppgene.cchmc.org/help/publications.jsp
-
+1. Chaiworapongsa T, Romero R, Whitten AE, et al. The use of angiogenic biomarkers in maternal blood to identify which SGA fetuses will require a preterm delivery and mothers who will develop pre-eclampsia. J Matern Fetal Neonatal Med. 2016;29(8):1214-28. [`PMID: 26303962`](https://pubmed.ncbi.nlm.nih.gov/26303962/)  
+2. Anderson UD, Olsson MG, Kristensen KH, et al. Biochemical markers to predict preeclampsia. Placenta. 2012;33:S42-7. [`PMID: 22197626`](https://pubmed.ncbi.nlm.nih.gov/22197626/)   
+3. Pandey AK, Lu L, Wang X, et al. Functionally enigmatic genes: a case study of the brain ignorome. PLoS One. 2014;9(2):e88889. [`PMID: 24523945`](https://pubmed.ncbi.nlm.nih.gov/24523945/)   
+4. Riba M, Garcia Manteiga JM, Bošnjak B, et al. Revealing the acute asthma ignorome: characterization and validation of uninvestigated gene networks. Sci Rep. 2016;6:24647. [`PMID: 27097888`](https://pubmed.ncbi.nlm.nih.gov/27097888/) 
+5. Callahan TJ, Tripodi IJ, Wyrwa JM, et al. Phenotype Knowledge Translator: A FAIR Ecosystem for Representing Large-Scale Biomedical Knowledge. 2022. [`Zenodo:5716383`](https://doi.org/10.5281/zenodo.5716383) 

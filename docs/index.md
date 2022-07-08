@@ -1,18 +1,71 @@
-# Knowledge-Driven Mechanistic Enrichment of the Preeclampsia Ignorome
-## What is an Ignorome?
-The ignorome has been defined as the portion of a gene signature shown to be significantly associated with a specific disease, but without a published mechanistic link — and often without any published disease association. Recently, researchers seeking to answer questions like “what proportion of genes with intense and selective expression in specific tissues, cells, or systems are still almost completely uncharacterized with respect to biological function?”<sup>1</sup> and “In what ways do these functionally enigmatic genes differ from well-studied genes?”<sup>1</sup> discovered that in general, the top 5% of statistically significant differentially expressed genes (DEGs) were responsible for 70% of the published literature for a given disease<sup>1</sup>. Examining ignored genes in more detail, these researchers found that there were no differences between the published and ignored genes in terms of their connectivity in co-expression networks; the biggest factor as to whether or not a gene was well-represented in the literature was its date of discovery<sup>1</sup>.
- 
+# Mechanistic Enrichment of the Preeclampsia Ignorome
 
-<!-- *Callahan TJ, Baumgartner Jr WA, Bada M, Stefanski AL, Tripodi I, White EK, Hunter LE. OWL-NETS: Transforming OWL Representations for Improved Network Inference. In Pacific Symposium on Biocomputing. Pacific Symposium on Biocomputing 2018 (Vol. 23, p. 133). NIH Public Access. [PMC5737627](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5737627/)* -->
+### Background
+- Preeclampsia (PE) is life-threatening, acute-onset hypertension and proteinuria at > 20 weeks gestation.<sup>1</sup> PE accounts for 40% of fetal mortality.<sup>2</sup> The only known cure is placenta delivery.  
+- Currently, more than one-third of all protein-coding genes have no known function or published literature (i.e., the ignorome).<sup>3,4</sup> Many disease-associated genes may provide important insight when examined within the context of of other diseases/phenotypes.  
+- An extensive body of scientific literature and data exist for PE. The PheKnowLator Ecosystem<sup>5</sup> helps users construct large-scale knowledge graphs (KGs) from a wide variety of biomedical data.
 
-## Knowledge Graphs Provide Mechanistic Insight into Complex Biological Phenomena
-### Overview
+**Objective:** Can PheKnowLator be used to identify novel and actionable molecular mechanisms from the PE ignorome?
 
+<br>  
 
-  
+___
 
+### Methods  
+The experimental design is highlighted in `Figure 1`.
 
+**Identification of the PE Molecular Signature**
+- A meta-analysis of domain expert-selected Gene Expression Omnibus (GEO)<sup>6</sup> studies. 
 
+**Identification of Known PE-Associated Genes**  
+- **Literature-Driven.** Mine PubTator,<sup>7</sup> DisGeNET,<sup>8</sup> and Malacards.<sup>9</sup>  
+- **Gene-Driven.** Differentially expressed genes (DEGs) queried against PubAnntotation.
+
+The PE ignorome was identified as genes from the PE molecular signature with no known PE-association in the literature. 
+
+**PheKnowLator KG Enrichment**
+- Generate KG node embeddings using Walking RDF/OWL.<sup>10</sup>  
+- The 100 nearest KG concepts (gold circles, Figure 1) to each ignorome gene were identified, reviewed by domain experts, and compared to gene set enrichment results produced by ToppGene.<sup>11</sup>
+
+<img src="https://user-images.githubusercontent.com/8030363/177888222-0c5c5113-08d8-4603-86f9-49c8a29c61e2.png" width="600" height="400"/>
+
+**Figure 1.** Overview of Results for Finding the Preeclampsia Ignorome. The figure provides an overview of the procedures utilized in order to obtain the preeclampsia ignorome. Acronyms - PE: Preeclampsia.
+
+<br>
+
+___
+
+### Results  
+- The PE ignorome contains 445 genes (Venn diagram, `Figure 1`). ToppGene Enrichment revealed that 90% of the PE ignorome genes were associated with a disease other than PE (`Figure 2`), most often neoplasms (48.7%).  
+- PheKnowLator-derived enrichment of the 100 KG concepts nearest to each PE ignorome gene resulted in 2,227 unique annotations.  
+- Expert reviewed reduced the 2,227 PheKnowLator annotations to 53 deemed worthy of experimental follow-up. None of the identified diseases, biological processes, cellular components, molecular functions, pathways, or phenotype associations overlapped with the ToppGene.  
+- Mechanistic explanations were derived for the 53 expert-selected annotations. An example of a novel disease association and mechanistic explanation is shown below:  
+<img width="500" src="https://user-images.githubusercontent.com/8030363/177889687-c32c8e88-e12d-4453-abe3-ebc1214b2fbd.png">
+
+<img src="https://user-images.githubusercontent.com/8030363/177890243-50a40fe7-93a9-49f2-b7c2-a1ef57eaa32e.png"/>
+
+**Figure 2.** Preeclampsia Ignorome Gene Annotations in Other Diseases. (A) illustrates the literature coverage of the 445 preeclampsia ignorome genes to other diseases. The x-axis represents the number of disease-annotated articles for each gene as of December 2017. The left y-axis shows the number of genes as bars, where the red bar contains the number of genes with no literature annotations to any disease. The right y-axis shows the number of diseases annotated to each preeclampsia gene and the number of annotations to diseases other than preeclampsia that were found for each ignorome gene in the literature. (B) Plots the counts of literature annotations to high-level disease categories.
+
+<br>
+
+___
+
+### Conclusions
+- Expert-led multiplatform microarray meta-analysis and literature mining identified the PE ignorome (n=445). The majority of the ignorome genes were associated with a disease other than PE.  
+- The KG-based enrichment strategy produced 53 highly relevant novel PE associations, thus potentially identifying additional targets for prevention/intervention.  
+- The PheKnowLator Ecosystem can aid researchers and bench scientists in relevant and biologically-actionable discovery and provide new opportunities to leverage existing resources.
+
+**Limitations:** Limited to transcriptionally-regulated molecules and should be considered with respect to the current lack of agreed upon standards for microarray meta-analysis.
+
+<br><br>
+
+____
+____
+
+### Data, Code, Gists, and Notebooks
+- [`Transcriptomic Metanalysis Notebook`](https://github.com/callahantiff/ignorenet/blob/master/notebooks/Biohackathon_GEO_Full_pipeline.nb.html). 
+- [`Knowledge Graph Node Embeddings`](https://zenodo.org/record/3830982/files/embeddings.zip)  
+- [`Enrichment Analysis Script (GitHub Gist)`](https://gist.github.com/callahantiff/86d174f27838b5a6d243859fdd3b8e1b)
 
 
 <br>
@@ -20,4 +73,15 @@ The ignorome has been defined as the portion of a gene signature shown to be sig
 ___
 
 #### References
-1. Pandey AK, Lu L, Wang X, Homayouni R, Williams RW. Functionally enigmatic genes: a case study of the brain ignorome. PLoS One. 2014;9(2):e88889. [PMID:24523945](https://pubmed.ncbi.nlm.nih.gov/24523945/)
+1. Chaiworapongsa et al. Nat Rev Nephrol 10 (2014):466-80 
+2. Anderson et al. Placenta 33 (2012):S42-S47 
+3. Pandey et al. PLoS One 9 (2014):e88889 
+4. Riba et al. Sci Rep 6 (2016):24647 
+5. Callahan et al. Zenodo (2022):5716383 
+6. https://www.ncbi.nlm.nih.gov/geo/   
+7. https://www.ncbi.nlm.nih.gov/research/pubtator/    
+8. https://www.disgenet.org/   
+9. https://www.malacards.org/   
+10. https://github.com/bio-ontology-research-group/walking-rdf-and-owl   
+11. https://toppgene.cchmc.org/help/publications.jsp
+

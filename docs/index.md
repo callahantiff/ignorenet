@@ -80,3 +80,11 @@ ___
 3. Pandey AK, Lu L, Wang X, et al. Functionally enigmatic genes: a case study of the brain ignorome. PLoS One. 2014;9(2):e88889. [`PMID: 24523945`](https://pubmed.ncbi.nlm.nih.gov/24523945/)   
 4. Riba M, Garcia Manteiga JM, Bošnjak B, et al. Revealing the acute asthma ignorome: characterization and validation of uninvestigated gene networks. Sci Rep. 2016;6:24647. [`PMID: 27097888`](https://pubmed.ncbi.nlm.nih.gov/27097888/) 
 5. Callahan TJ, Tripodi IJ, Wyrwa JM, et al. Phenotype Knowledge Translator: A FAIR Ecosystem for Representing Large-Scale Biomedical Knowledge. 2022. [`Zenodo:5716383`](https://doi.org/10.5281/zenodo.5716383) 
+
+
+____
+
+```
+Preprint of an article submitted for consideration in Pacific Symposium on Biocomputing © 2022 copyright World Scientific Publishing Company https://psb.stanford.edu/
+
+```

@@ -27,7 +27,7 @@ The PE ignorome was identified as genes from the PE molecular signature with no 
 - Generate KG node embeddings using [Walking RDF/OWL](https://github.com/bio-ontology-research-group/walking-rdf-and-owl).  
 - The 100 nearest KG concepts (gold circles, `Figure 1`) to each ignorome gene were identified, reviewed by domain experts, and compared to gene set enrichment results produced by [ToppGene](https://toppgene.cchmc.org/help/publications.jsp).
 
-<img src="https://user-images.githubusercontent.com/8030363/177888222-0c5c5113-08d8-4603-86f9-49c8a29c61e2.png" width="800" height="600"/>
+<img src="https://user-images.githubusercontent.com/8030363/177888222-0c5c5113-08d8-4603-86f9-49c8a29c61e2.png" width="800" height="500"/>
 
 **Figure 1.** Overview of Results for Finding the Preeclampsia Ignorome. The figure provides an overview of the procedures utilized in order to obtain the preeclampsia ignorome. Acronyms - PE: Preeclampsia.
 

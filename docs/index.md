@@ -27,7 +27,7 @@ The PE ignorome was identified as genes from the PE molecular signature with no 
 - Generate KG node embeddings using [Walking RDF/OWL](https://github.com/bio-ontology-research-group/walking-rdf-and-owl).  
 - The 100 nearest KG concepts (gold circles, `Figure 1`) to each ignorome gene were identified, reviewed by domain experts, and compared to gene set enrichment results produced by [ToppGene](https://toppgene.cchmc.org/help/publications.jsp).
 
-<img src="https://user-images.githubusercontent.com/8030363/177888222-0c5c5113-08d8-4603-86f9-49c8a29c61e2.png" width="600" height="400"/>
+<img src="https://user-images.githubusercontent.com/8030363/177888222-0c5c5113-08d8-4603-86f9-49c8a29c61e2.png" width="800" height="600"/>
 
 **Figure 1.** Overview of Results for Finding the Preeclampsia Ignorome. The figure provides an overview of the procedures utilized in order to obtain the preeclampsia ignorome. Acronyms - PE: Preeclampsia.
 
@@ -42,7 +42,7 @@ ___
 - Mechanistic explanations were derived for the 53 expert-selected annotations. An example of a novel disease association and mechanistic explanation is shown below:  
 <img width="500" src="https://user-images.githubusercontent.com/8030363/177889687-c32c8e88-e12d-4453-abe3-ebc1214b2fbd.png">
 
-<img src="https://user-images.githubusercontent.com/8030363/177890243-50a40fe7-93a9-49f2-b7c2-a1ef57eaa32e.png"/>
+<img src="https://user-images.githubusercontent.com/8030363/177890243-50a40fe7-93a9-49f2-b7c2-a1ef57eaa32e.png" width="1200" height="400"/>
 
 **Figure 2.** Preeclampsia Ignorome Gene Annotations in Other Diseases. (A) illustrates the literature coverage of the 445 preeclampsia ignorome genes to other diseases. The x-axis represents the number of disease-annotated articles for each gene as of December 2017. The left y-axis shows the number of genes as bars, where the red bar contains the number of genes with no literature annotations to any disease. The right y-axis shows the number of diseases annotated to each preeclampsia gene and the number of annotations to diseases other than preeclampsia that were found for each ignorome gene in the literature. (B) Plots the counts of literature annotations to high-level disease categories.
 

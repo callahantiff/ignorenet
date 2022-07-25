@@ -63,11 +63,11 @@ ____
 ____
 
 ### Data, Code, Gists, and Notebooks
-- [`Transcriptomic Metanalysis Notebook`](https://github.com/callahantiff/ignorenet/blob/master/notebooks/Biohackathon_GEO_Full_pipeline.nb.html)   
-- [`Knowledge Graph Node Embeddings`](https://zenodo.org/record/3830982/files/embeddings.zip)  
-- [`Enrichment Analysis Script (GitHub Gist)`](https://gist.github.com/callahantiff/86d174f27838b5a6d243859fdd3b8e1b)  
+- [Transcriptomic Metanalysis Notebook (Jupyter Notebook)](https://github.com/callahantiff/ignorenet/blob/master/notebooks/Biohackathon_GEO_Full_pipeline.nb.html)   
+- [Knowledge Graph Node Embeddings](https://zenodo.org/record/3830982/files/embeddings.zip)  
+- [Enrichment Analysis Script (GitHub Gist)](https://gist.github.com/callahantiff/86d174f27838b5a6d243859fdd3b8e1b)  
 
-**PheKnowLator Knowledge Graphs:** [`https://github.com/callahantiff/PheKnowLator`](https://github.com/callahantiff/PheKnowLator)  
+**PheKnowLator Knowledge Graph (`v1.0`):** [https://github.com/callahantiff/PheKnowLator/wiki/v1.0.0](https://github.com/callahantiff/PheKnowLator/wiki/v1.0.0)  
 
 
 <br>

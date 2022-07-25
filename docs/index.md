@@ -42,7 +42,7 @@ ___
 - Mechanistic explanations were derived for the 53 expert-selected annotations. An example of a novel disease association and mechanistic explanation is shown below:  
 <img width="500" src="https://user-images.githubusercontent.com/8030363/177889687-c32c8e88-e12d-4453-abe3-ebc1214b2fbd.png">
 
-<img src="https://user-images.githubusercontent.com/8030363/177890243-50a40fe7-93a9-49f2-b7c2-a1ef57eaa32e.png" width="1200" height="400"/>
+<img src="https://user-images.githubusercontent.com/8030363/177890243-50a40fe7-93a9-49f2-b7c2-a1ef57eaa32e.png" width="1200" height="350"/>
 
 **Figure 2.** Preeclampsia Ignorome Gene Annotations in Other Diseases. (A) illustrates the literature coverage of the 445 preeclampsia ignorome genes to other diseases. The x-axis represents the number of disease-annotated articles for each gene as of December 2017. The left y-axis shows the number of genes as bars, where the red bar contains the number of genes with no literature annotations to any disease. The right y-axis shows the number of diseases annotated to each preeclampsia gene and the number of annotations to diseases other than preeclampsia that were found for each ignorome gene in the literature. (B) Plots the counts of literature annotations to high-level disease categories.
 

@@ -1,5 +1,3 @@
-<!-- # Mechanistic Enrichment of the Preeclampsia Ignorome -->
-
 ### Background
 - Preeclampsia (PE) is life-threatening, acute-onset hypertension and proteinuria at > 20 weeks gestation.<sup>1</sup> PE accounts for 40% of fetal mortality.<sup>2</sup> The only known cure is placenta delivery.  
 - Currently, more than one-third of all protein-coding genes have no known function or published literature (i.e., the ignorome).<sup>3,4</sup> Many disease-associated genes may provide important insight when examined within the context of of other diseases/phenotypes.  
@@ -84,7 +82,9 @@ ___
 
 ____
 
+📢 Preprint can be found here 👉 [https://arxiv.org/abs/2207.14294](https://arxiv.org/abs/2207.14294)
+
 ```
-Preprint of an article submitted for consideration in Pacific Symposium on Biocomputing © 2022 copyright World Scientific Publishing Company https://psb.stanford.edu/
+A preprint of this article submitted for consideration in Pacific Symposium on Biocomputing © 2022 copyright World Scientific Publishing Company https://psb.stanford.edu/
 
 ```

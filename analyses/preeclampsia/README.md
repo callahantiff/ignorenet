@@ -79,17 +79,17 @@ To determine if these associations occurred by chance, we:
 ___
 
 ## Resource List  
-- [Transcriptomic Metanalysis Notebook (Jupyter Notebook)](https://github.com/callahantiff/ignorenet/blob/master/notebooks/Biohackathon_GEO_Full_pipeline.nb.html)   
-- [Knowledge Graph Node Embeddings](https://zenodo.org/record/7030189)  
-- [Analysis Script](https://github.com/callahantiff/ignorenet/blob/master/analyses/preeclampsia/analysis_script.py)  
-- [Zipped Data (all data referenced by analysis script)](https://zenodo.org/record/7105487/files/analysis_data.zip)  
+- GEO Metanalysis Notebook (Jupyter Notebook): https://github.com/callahantiff/ignorenet/blob/master/notebooks/Biohackathon_GEO_Full_pipeline.nb.html   
+- Analysis Script: https://github.com/callahantiff/ignorenet/blob/master/analyses/preeclampsia/analysis_script.py  
+- Zipped Analysis Data: https://zenodo.org/record/7105487/files/analysis_data.zip    
 
 **PheKnowLator Knowledge Graph (`v1.0`):**  
 - GitHub: https://github.com/callahantiff/PheKnowLator/wiki/v1-Build-Details  
-- Data: https://zenodo.org/record/7030201   
+- Knowledge Graph: https://zenodo.org/record/7030201
+- Node Embeddings: https://zenodo.org/record/7030189     
 
 **Ignorome Gene Lists:**  
-- [Preeclampsia Gene Lists](https://github.com/callahantiff/ignorenet/blob/master/analyses/preeclampsia/preeclampsia_gene_lists.txt)  
+- Preeclampsia Gene Lists: https://github.com/callahantiff/ignorenet/blob/master/analyses/preeclampsia/preeclampsia_gene_lists.txt  
 
 
 

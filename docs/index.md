@@ -5,7 +5,7 @@
 
 **Objective:** Can PheKnowLator be used to identify novel and actionable molecular mechanisms from the PE ignorome?
 
-<br>  
+<br>    
 
 ___
 
@@ -60,13 +60,8 @@ ___
 ____
 ____
 
-### Data, Code, Gists, and Notebooks
-- [Transcriptomic Metanalysis Notebook (Jupyter Notebook)](https://github.com/callahantiff/ignorenet/blob/master/notebooks/Biohackathon_GEO_Full_pipeline.nb.html)   
-- [Knowledge Graph Node Embeddings](https://zenodo.org/record/3830982/files/embeddings.zip)  
-- [Enrichment Analysis Script (GitHub Gist)](https://gist.github.com/callahantiff/86d174f27838b5a6d243859fdd3b8e1b)  
-
-**PheKnowLator Knowledge Graph (`v1.0`):** [https://github.com/callahantiff/PheKnowLator/wiki/v1.0.0](https://github.com/callahantiff/PheKnowLator/wiki/v1.0.0)  
-
+### Data, Code, Gists, and Notebooks  
+Please see the following [README](https://github.com/callahantiff/ignorenet/blob/master/analyses/preeclampsia/README.md) for a detailed description of the analysis workflow, including the data and code.  
 
 <br>
 
@@ -84,7 +79,4 @@ ____
 
 📢 Preprint can be found here 👉 [https://arxiv.org/abs/2207.14294](https://arxiv.org/abs/2207.14294)
 
-```
-A preprint of this article submitted for consideration in Pacific Symposium on Biocomputing © 2022 copyright World Scientific Publishing Company https://psb.stanford.edu/
 
-```

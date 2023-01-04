@@ -77,6 +77,6 @@ ___
 
 ____
 
-📢 Preprint can be found here 👉 [https://arxiv.org/abs/2207.14294](https://arxiv.org/abs/2207.14294)
+📢 Peer-reviewed article can be found here 👉 [PMID:36540992](https://pubmed.ncbi.nlm.nih.gov/36540992)
 
 
